@@ -4,6 +4,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QJsonArray>
+#include <QStandardItemModel>
 #include "mainwindow.h"
 
 int main(int argc, char *argv[])
@@ -26,13 +28,16 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    if (doc.isObject()) {
-        QJsonObject obj = doc.object();
+    if (doc.isArray()) {
+        QJsonArray jsonArray = doc.array();
+        QStandardItemModel *model = new QStandardItemModel();
 
-        // Example: Reading a string value for key "appName"
-        if (obj.contains("appName")) {
-            QString name = obj["appName"].toString();
-            qDebug() << "App Name:" << name;
+        for (const QJsonValue &value : std::as_const(jsonArray)) {
+            QJsonObject obj = value.toObject();
+            QList<QStandardItem *> row;
+            row << new QStandardItem(obj["Name"].toString());
+            //row << new QStandardItem(QUuid(obj["Oid"].toString()));
+            model->appendRow(row);
         }
     }
 

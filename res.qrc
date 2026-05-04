@@ -1,5 +1,9 @@
 <RCC>
     <qresource prefix="/">
         <file>db.json</file>
+        <file>images/tb/exit.svg</file>
+        <file>images/tb/add.svg</file>
+        <file>images/tb/del.svg</file>
+        <file>images/sensor.svg</file>
     </qresource>
 </RCC>

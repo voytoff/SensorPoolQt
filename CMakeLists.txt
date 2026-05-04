@@ -11,8 +11,6 @@ find_package(Qt6 6.5 REQUIRED COMPONENTS
     Concurrent
 )
 
-
-
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -25,6 +23,9 @@ qt_add_executable(appSensorPool
     main.cpp
     mainwindow.h mainwindow.cpp
     ${PROJECT_RESOURCES}
+    sensorproperties.h sensorproperties.cpp sensorproperties.ui
+    sensormodel.h sensormodel.cpp
+
 )
 
 set_target_properties(appSensorPool PROPERTIES

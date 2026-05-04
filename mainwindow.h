@@ -18,6 +18,8 @@ public:
     explicit MainWindow(const QString &artistTable, QWidget *parent = nullptr);
 private slots:
     void adjustHeader();
+    void addAlbum();
+    void about();
 
 private:
     QTableView *albumView;

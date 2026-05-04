@@ -11,10 +11,13 @@
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QTableView>
+#include <QIcon>
+#include "sensorproperties.h"
 
 MainWindow::MainWindow(const QString &artistTable, QWidget *parent)
     : QMainWindow{parent}
 {
+    this->setWindowIcon(QIcon(":/images/sensor.svg"));
     QGroupBox *albums = createAlbumGroupBox();
 
     QGridLayout *layout = new QGridLayout;
@@ -31,34 +34,35 @@ MainWindow::MainWindow(const QString &artistTable, QWidget *parent)
 
 void MainWindow::createMenuBar()
 {
-    QAction *addAction = new QAction(tr("&Add album..."), this);
-    QAction *deleteAction = new QAction(tr("&Delete album..."), this);
-    QAction *quitAction = new QAction(tr("&Quit"), this);
+    QAction *addAction = new QAction(QIcon(":/images/tb/add.svg"), tr("Добавить датчик..."), this);
+    QAction *deleteAction = new QAction(QIcon(":/images/tb/del.svg"), tr("Удалить текущий..."), this);
+    QAction *quitAction = new QAction(QIcon(":/images/tb/exit.svg"), tr("&Quit"), this);
     QAction *aboutAction = new QAction(tr("&About"), this);
     QAction *aboutQtAction = new QAction(tr("About &Qt"), this);
 
-    addAction->setShortcut(tr("Ctrl+A"));
+    addAction->setShortcut(QKeySequence(Qt::CTRL|Qt::Key_A));
     deleteAction->setShortcut(tr("Ctrl+D"));
     quitAction->setShortcuts(QKeySequence::Quit);
 
-    QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
+    QMenu *fileMenu = menuBar()->addMenu(tr("&Файл"));
     fileMenu->addAction(addAction);
     fileMenu->addAction(deleteAction);
     fileMenu->addSeparator();
     fileMenu->addAction(quitAction);
 
-    QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
+    QMenu *helpMenu = menuBar()->addMenu(tr("&?"));
     helpMenu->addAction(aboutAction);
     helpMenu->addAction(aboutQtAction);
-    /*
+
     connect(addAction, &QAction::triggered,
             this, &MainWindow::addAlbum);
+    connect(aboutAction, &QAction::triggered,
+            this, &MainWindow::about);
+    /*
     connect(deleteAction, &QAction::triggered,
             this, &MainWindow::deleteAlbum);
     connect(quitAction, &QAction::triggered,
             qApp, &QCoreApplication::quit);
-    connect(aboutAction, &QAction::triggered,
-            this, &MainWindow::about);
     connect(aboutQtAction, &QAction::triggered,
             qApp, &QApplication::aboutQt);
 */
@@ -94,6 +98,33 @@ QGroupBox *MainWindow::createAlbumGroupBox()
 
     return box;
 }
+
+void MainWindow::addAlbum()
+{
+    SensorProperties *dialog = new SensorProperties(/*model, albumData, file, */this);
+    int accepted = dialog->exec();
+
+    if (accepted == QDialog::Accepted) {
+        //int lastRow = model->rowCount() - 1;
+        //albumView->selectRow(lastRow);
+        albumView->scrollToBottom();
+        //showAlbumDetails(model->index(lastRow, 0));
+    }
+}
+
+void MainWindow::about()
+{
+    QMessageBox::about(this, tr("About Music Archive"),
+                       tr("<p>The <b>Music Archive</b> example shows how to present "
+                          "data from different data sources in the same application. "
+                          "The album titles, and the corresponding artists and release dates, "
+                          "are kept in a database, while each album's tracks are stored "
+                          "in an XML file. </p><p>The example also shows how to add as "
+                          "well as remove data from both the database and the "
+                          "associated XML file using the API provided by the Qt SQL and "
+                          "Qt XML modules, respectively.</p>"));
+}
+
 void MainWindow::adjustHeader()
 {
     albumView->hideColumn(0);
