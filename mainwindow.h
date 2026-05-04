@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QMainWindow>
 #include <QModelIndex>
 
 QT_FORWARD_DECLARE_CLASS(QComboBox)
@@ -19,11 +18,11 @@ public:
     explicit MainWindow(const QString &artistTable, QWidget *parent = nullptr);
 private slots:
     void adjustHeader();
+
 private:
     QTableView *albumView;
     QGroupBox *createAlbumGroupBox();
     void createMenuBar();
-
 
 signals:
 };

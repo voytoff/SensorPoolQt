@@ -1,20 +1,30 @@
-cmake_minimum_required(VERSION 3.16)
-
+cmake_minimum_required(VERSION 3.20)
 project(SensorPool VERSION 0.1 LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 20)
+
+find_package(Qt6 6.5 REQUIRED COMPONENTS
+    Quick
+    Core
+    Widgets
+    LinguistTools
+    Svg
+    Concurrent
+)
+
+
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 6.2 COMPONENTS Quick REQUIRED)
-find_package(Qt6 REQUIRED COMPONENTS Widgets)
+qt_standard_project_setup()
 
-set(appSensorPool_resource_files
-    res.qrc
-)
+set(RESOURCE_FILES res.qrc)
+qt6_add_resources(PROJECT_RESOURCES ${RESOURCE_FILES})
+
 qt_add_executable(appSensorPool
     main.cpp
     mainwindow.h mainwindow.cpp
-    ${appSensorPool_resource_files}
+    ${PROJECT_RESOURCES}
 )
 
 set_target_properties(appSensorPool PROPERTIES

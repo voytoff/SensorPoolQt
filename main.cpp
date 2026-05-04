@@ -1,18 +1,17 @@
-#include "mainwindow.h"
 #include <QApplication>
+#include <QDebug>
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
-#include <QDebug>
+#include "mainwindow.h"
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
-
     QFile file(":/db.json");
-    if (!file.open(QIODevice::ReadOnly|QIODevice::Text)) {
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qWarning() << "Couldn't open file:" << ":/db.json";
         return EXIT_FAILURE;
     }
@@ -40,5 +39,4 @@ int main(int argc, char *argv[])
     MainWindow window("artists");
     window.show();
     return app.exec();
-
 }

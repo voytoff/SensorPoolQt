@@ -1,10 +1,10 @@
 #include "mainwindow.h"
 #include <QApplication>
 #include <QComboBox>
-#include <QHeaderView>
 #include <QFile>
 #include <QGridLayout>
 #include <QGroupBox>
+#include <QHeaderView>
 #include <QLabel>
 #include <QListWidget>
 #include <QMenu>
@@ -50,7 +50,7 @@ void MainWindow::createMenuBar()
     QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
     helpMenu->addAction(aboutAction);
     helpMenu->addAction(aboutQtAction);
-/*
+    /*
     connect(addAction, &QAction::triggered,
             this, &MainWindow::addAlbum);
     connect(deleteAction, &QAction::triggered,
@@ -64,7 +64,7 @@ void MainWindow::createMenuBar()
 */
 }
 
-QGroupBox* MainWindow::createAlbumGroupBox()
+QGroupBox *MainWindow::createAlbumGroupBox()
 {
     QGroupBox *box = new QGroupBox(tr("Album"));
 
@@ -89,7 +89,7 @@ QGroupBox* MainWindow::createAlbumGroupBox()
             this, &MainWindow::showAlbumDetails);
     */
     QVBoxLayout *layout = new QVBoxLayout;
-    layout->addWidget(albumView, 0, { });
+    layout->addWidget(albumView, 0, {});
     box->setLayout(layout);
 
     return box;
@@ -97,7 +97,7 @@ QGroupBox* MainWindow::createAlbumGroupBox()
 void MainWindow::adjustHeader()
 {
     albumView->hideColumn(0);
-    albumView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
-    albumView->resizeColumnToContents(2);
-    albumView->resizeColumnToContents(3);
+    //albumView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+    //albumView->resizeColumnToContents(2);
+    //albumView->resizeColumnToContents(3);
 }
