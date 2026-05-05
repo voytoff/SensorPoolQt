@@ -8,8 +8,7 @@
 #include <QJsonObject>
 #include <QVariant>
 
-struct Sensor
-{
+struct Sensor {
   QUuid Oid;
   QString Name;
   bool Active;
@@ -28,8 +27,7 @@ struct Sensor
 };
 
 
-inline QDataStream &operator<<(QDataStream &stream, const Sensor &sensor)
-{
+inline QDataStream &operator<<(QDataStream &stream, const Sensor &sensor) {
   return stream
          << sensor.Oid
          << sensor.Name
@@ -43,8 +41,7 @@ inline QDataStream &operator<<(QDataStream &stream, const Sensor &sensor)
          << sensor.Quantity;
 }
 
-inline QDataStream &operator>>(QDataStream &stream, Sensor &sensor)
-{
+inline QDataStream &operator>>(QDataStream &stream, Sensor &sensor) {
   return stream
          >> sensor.Oid
          >> sensor.Name
@@ -57,26 +54,22 @@ inline QDataStream &operator>>(QDataStream &stream, Sensor &sensor)
          >> sensor.Unit
          >> sensor.Quantity;
 }
-inline Sensor operator>>(QJsonObject &obj, Sensor &sensor)
-{
-  return Sensor
-      {
-          QUuid(obj["Oid"].toString()),
-          obj["Name"].toString(),
-          obj["Active"].toBool(),
-          obj["SensorHost"].toString(),
-          obj["SensorPort"].toInt(),
-          obj["SensorConverter"].toString(),
-          obj["ChannelName"].toString(),
-          obj["Description"].toString(),
-          obj["Unit"].toString(),
-          obj["Quantity"].toInt()
-      };
+inline Sensor operator>>(QJsonObject &obj, Sensor &sensor) {
+  sensor.Oid = QUuid(obj.value("Oid").toString());
+  sensor.Name = obj.value("Name").toString();
+  sensor.Active = obj.value("Active").toBool();
+  sensor.SensorHost = obj.value("SensorHost").toString();
+  sensor.SensorPort = obj.value("SensorPort").toInt();
+  sensor.SensorConverter = obj.value("SensorConverter").toString();
+  sensor.ChannelName = obj.value("ChannelName").toString();
+  sensor.Description = obj.value("Description").toString();
+  sensor.Unit = obj.value("Unit").toString();
+  sensor.Quantity = obj.value("Quantity").toInt();
+  return sensor;
 }
 
 
-class SensorModel: public QAbstractTableModel
-{
+class SensorModel: public QAbstractTableModel {
   Q_OBJECT
   public:
     SensorModel(QObject *parent = nullptr);

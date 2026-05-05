@@ -12,6 +12,7 @@
 #include <QMessageBox>
 #include <QTableView>
 #include <QIcon>
+
 #include "sensorproperties.h"
 
 MainWindow::MainWindow(const QString &artistTable, QWidget *parent)
@@ -21,12 +22,12 @@ MainWindow::MainWindow(const QString &artistTable, QWidget *parent)
   this->setWindowIcon(QIcon(":/images/sensor.svg"));
   table->readFromFile();
 
-  QGroupBox *albums = createAlbumGroupBox();
+  QGroupBox *sensorList = createSensorBox();
 
   QGridLayout *layout = new QGridLayout;
-  layout->addWidget(albums, 0, 0);
-  layout->setColumnStretch(1, 1);
-  layout->setColumnMinimumWidth(0, 500);
+  layout->addWidget(sensorList, 0, 0);
+  //layout->setColumnStretch(1, 1);
+  //layout->setColumnMinimumWidth(0, 500);
 
   QWidget *widget = new QWidget;
   widget->setLayout(layout);
@@ -71,20 +72,24 @@ void MainWindow::createMenuBar()
 */
 }
 
-QGroupBox *MainWindow::createAlbumGroupBox()
+QGroupBox *MainWindow::createSensorBox()
 {
-    QGroupBox *box = new QGroupBox(tr("Album"));
+    QGroupBox *box = new QGroupBox(tr("Sensors"));
 
-    view = new QTableView;
-    view->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    view->setSortingEnabled(true);
-    view->setSelectionBehavior(QAbstractItemView::SelectRows);
-    view->setSelectionMode(QAbstractItemView::SingleSelection);
-    view->setShowGrid(false);
-    view->verticalHeader()->hide();
-    view->setAlternatingRowColors(true);
-    //view->setModel(model);
+  view = new QTreeView;// QTableView;
+    //view->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    //view->setSortingEnabled(true);
+    //view->setSelectionBehavior(QAbstractItemView::SelectRows);
+    //view->setSelectionMode(QAbstractItemView::SingleSelection);
+    //view->setShowGrid(false);
+    //view->verticalHeader()->hide();
+    //view->setAlternatingRowColors(true);
+    view->setModel(table);
     adjustHeader();
+
+    view->setRootIsDecorated(false);
+    view->setAlternatingRowColors(true);
+    view->setSortingEnabled(true);
 
     QLocale locale = view->locale();
     locale.setNumberOptions(QLocale::OmitGroupSeparator);
@@ -126,6 +131,6 @@ void MainWindow::adjustHeader()
 {
     view->hideColumn(0);
     //view->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
-    //view->resizeColumnToContents(2);
-    //view->resizeColumnToContents(3);
+    view->resizeColumnToContents(2);
+    view->resizeColumnToContents(3);
 }
