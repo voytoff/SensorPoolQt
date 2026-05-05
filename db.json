@@ -9,6 +9,6 @@
     "ChannelName": "БАР",
     "Description": "Барометр",
     "Unit": "мм рт.ст.",
-    "Quantity": 0
+    "Quantity": 10
   }
 ]

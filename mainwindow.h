@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QModelIndex>
+#include "sensormodel.h"
 
 QT_FORWARD_DECLARE_CLASS(QComboBox)
 QT_FORWARD_DECLARE_CLASS(QFile)
@@ -22,7 +23,8 @@ private slots:
     void about();
 
 private:
-    QTableView *albumView;
+    QTableView *view;
+    SensorModel *table;
     QGroupBox *createAlbumGroupBox();
     void createMenuBar();
 

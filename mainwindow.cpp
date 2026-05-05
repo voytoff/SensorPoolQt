@@ -15,21 +15,24 @@
 #include "sensorproperties.h"
 
 MainWindow::MainWindow(const QString &artistTable, QWidget *parent)
-    : QMainWindow{parent}
+    : QMainWindow{parent},
+    table(new SensorModel(this))
 {
-    this->setWindowIcon(QIcon(":/images/sensor.svg"));
-    QGroupBox *albums = createAlbumGroupBox();
+  this->setWindowIcon(QIcon(":/images/sensor.svg"));
+  table->readFromFile();
 
-    QGridLayout *layout = new QGridLayout;
-    layout->addWidget(albums, 0, 0);
-    layout->setColumnStretch(1, 1);
-    layout->setColumnMinimumWidth(0, 500);
+  QGroupBox *albums = createAlbumGroupBox();
 
-    QWidget *widget = new QWidget;
-    widget->setLayout(layout);
-    setCentralWidget(widget);
+  QGridLayout *layout = new QGridLayout;
+  layout->addWidget(albums, 0, 0);
+  layout->setColumnStretch(1, 1);
+  layout->setColumnMinimumWidth(0, 500);
 
-    createMenuBar();
+  QWidget *widget = new QWidget;
+  widget->setLayout(layout);
+  setCentralWidget(widget);
+
+  createMenuBar();
 }
 
 void MainWindow::createMenuBar()
@@ -72,28 +75,28 @@ QGroupBox *MainWindow::createAlbumGroupBox()
 {
     QGroupBox *box = new QGroupBox(tr("Album"));
 
-    albumView = new QTableView;
-    albumView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    albumView->setSortingEnabled(true);
-    albumView->setSelectionBehavior(QAbstractItemView::SelectRows);
-    albumView->setSelectionMode(QAbstractItemView::SingleSelection);
-    albumView->setShowGrid(false);
-    albumView->verticalHeader()->hide();
-    albumView->setAlternatingRowColors(true);
-    //albumView->setModel(model);
+    view = new QTableView;
+    view->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    view->setSortingEnabled(true);
+    view->setSelectionBehavior(QAbstractItemView::SelectRows);
+    view->setSelectionMode(QAbstractItemView::SingleSelection);
+    view->setShowGrid(false);
+    view->verticalHeader()->hide();
+    view->setAlternatingRowColors(true);
+    //view->setModel(model);
     adjustHeader();
 
-    QLocale locale = albumView->locale();
+    QLocale locale = view->locale();
     locale.setNumberOptions(QLocale::OmitGroupSeparator);
-    albumView->setLocale(locale);
+    view->setLocale(locale);
     /*
-    connect(albumView, &QTableView::clicked,
+    connect(view, &QTableView::clicked,
             this, &MainWindow::showAlbumDetails);
-    connect(albumView, &QTableView::activated,
+    connect(view, &QTableView::activated,
             this, &MainWindow::showAlbumDetails);
     */
     QVBoxLayout *layout = new QVBoxLayout;
-    layout->addWidget(albumView, 0, {});
+    layout->addWidget(view, 0, {});
     box->setLayout(layout);
 
     return box;
@@ -106,8 +109,8 @@ void MainWindow::addAlbum()
 
     if (accepted == QDialog::Accepted) {
         //int lastRow = model->rowCount() - 1;
-        //albumView->selectRow(lastRow);
-        albumView->scrollToBottom();
+        //view->selectRow(lastRow);
+        view->scrollToBottom();
         //showAlbumDetails(model->index(lastRow, 0));
     }
 }
@@ -115,20 +118,14 @@ void MainWindow::addAlbum()
 void MainWindow::about()
 {
     QMessageBox::about(this, tr("About Music Archive"),
-                       tr("<p>The <b>Music Archive</b> example shows how to present "
-                          "data from different data sources in the same application. "
-                          "The album titles, and the corresponding artists and release dates, "
-                          "are kept in a database, while each album's tracks are stored "
-                          "in an XML file. </p><p>The example also shows how to add as "
-                          "well as remove data from both the database and the "
-                          "associated XML file using the API provided by the Qt SQL and "
-                          "Qt XML modules, respectively.</p>"));
+                       tr("<p>The <b>Sensor pull</b> программа записи параметров "
+                          "обработки экспериментов с датчиков регистрации.</p>"));
 }
 
 void MainWindow::adjustHeader()
 {
-    albumView->hideColumn(0);
-    //albumView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
-    //albumView->resizeColumnToContents(2);
-    //albumView->resizeColumnToContents(3);
+    view->hideColumn(0);
+    //view->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+    //view->resizeColumnToContents(2);
+    //view->resizeColumnToContents(3);
 }

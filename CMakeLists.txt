@@ -8,6 +8,7 @@ find_package(Qt6 6.5 REQUIRED COMPONENTS
     Widgets
     LinguistTools
     Svg
+    Gui
     Concurrent
 )
 
@@ -36,7 +37,11 @@ set_target_properties(appSensorPool PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
-target_link_libraries(appSensorPool PRIVATE Qt6::Widgets Qt6::Quick)
+target_link_libraries(appSensorPool PRIVATE
+    Qt6::Widgets
+    Qt6::Quick
+    Qt6::Gui
+)
 
 include(GNUInstallDirs)
 install(TARGETS appSensorPool
