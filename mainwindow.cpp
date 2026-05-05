@@ -12,12 +12,16 @@
 #include <QMessageBox>
 #include <QTableView>
 #include <QIcon>
+#include <QSizeGrip>
+#include <QStatusBar>
+#include <QSettings>
+#include <QModelIndex>
 
 #include "sensorproperties.h"
 
 MainWindow::MainWindow(const QString &artistTable, QWidget *parent)
-    : QMainWindow{parent},
-    table(new SensorModel(this))
+  : QMainWindow{parent},
+  table(new SensorModel(this))
 {
   this->setWindowIcon(QIcon(":/images/sensor.svg"));
   table->readFromFile();
@@ -26,6 +30,7 @@ MainWindow::MainWindow(const QString &artistTable, QWidget *parent)
 
   QGridLayout *layout = new QGridLayout;
   layout->addWidget(sensorList, 0, 0);
+  //layout->addWidget(new QSizeGrip(this), 1, 0, Qt::AlignBottom | Qt::AlignRight);
   //layout->setColumnStretch(1, 1);
   //layout->setColumnMinimumWidth(0, 500);
 
@@ -34,6 +39,15 @@ MainWindow::MainWindow(const QString &artistTable, QWidget *parent)
   setCentralWidget(widget);
 
   createMenuBar();
+  statusBar()->setSizeGripEnabled(true);
+  restoreLayout();
+}
+
+void MainWindow::closeEvent(QCloseEvent *event) {
+  QSettings settings(Company, AppName);
+  settings.setValue("geometry", saveGeometry()); // Saves window size/position
+  settings.setValue("windowState", saveState()); // Saves dock/toolbar layout
+  QMainWindow::closeEvent(event);
 }
 
 void MainWindow::createMenuBar()
@@ -59,7 +73,7 @@ void MainWindow::createMenuBar()
     helpMenu->addAction(aboutQtAction);
 
     connect(addAction, &QAction::triggered,
-            this, &MainWindow::addAlbum);
+            this, &MainWindow::addSensor);
     connect(aboutAction, &QAction::triggered,
             this, &MainWindow::about);
     /*
@@ -70,6 +84,13 @@ void MainWindow::createMenuBar()
     connect(aboutQtAction, &QAction::triggered,
             qApp, &QApplication::aboutQt);
 */
+}
+
+void MainWindow::restoreLayout()
+{
+  QSettings settings(Company, AppName);
+  restoreGeometry(settings.value("geometry").toByteArray());
+  restoreState(settings.value("windowState").toByteArray());
 }
 
 QGroupBox *MainWindow::createSensorBox()
@@ -90,6 +111,7 @@ QGroupBox *MainWindow::createSensorBox()
     view->setRootIsDecorated(false);
     view->setAlternatingRowColors(true);
     view->setSortingEnabled(true);
+    connect(view, &QTreeView::doubleClicked, this, &MainWindow::treeDoubleClick);
 
     QLocale locale = view->locale();
     locale.setNumberOptions(QLocale::OmitGroupSeparator);
@@ -107,24 +129,40 @@ QGroupBox *MainWindow::createSensorBox()
     return box;
 }
 
-void MainWindow::addAlbum()
-{
-    SensorProperties *dialog = new SensorProperties(/*model, albumData, file, */this);
-    int accepted = dialog->exec();
-
-    if (accepted == QDialog::Accepted) {
-        //int lastRow = model->rowCount() - 1;
-        //view->selectRow(lastRow);
-        view->scrollToBottom();
-        //showAlbumDetails(model->index(lastRow, 0));
-    }
-}
-
 void MainWindow::about()
 {
     QMessageBox::about(this, tr("About Music Archive"),
                        tr("<p>The <b>Sensor pull</b> программа записи параметров "
                           "обработки экспериментов с датчиков регистрации.</p>"));
+}
+
+void MainWindow::addSensor()
+{
+  Sensor sensor{QUuid()};
+  SensorProperties *dialog = new SensorProperties(sensor, this);
+  int accepted = dialog->exec();
+
+  if (accepted == QDialog::Accepted) {
+    //int lastRow = model->rowCount() - 1;
+    //view->selectRow(lastRow);
+    view->scrollToBottom();
+    //showAlbumDetails(model->index(lastRow, 0));
+  }
+}
+
+void MainWindow::treeDoubleClick()
+{
+  Sensor sensor = *table->get(0);
+
+  SensorProperties *dialog = new SensorProperties(sensor, this);
+  int accepted = dialog->exec();
+
+  if (accepted == QDialog::Accepted) {
+    //int lastRow = model->rowCount() - 1;
+    //view->selectRow(lastRow);
+    view->scrollToBottom();
+    //showAlbumDetails(model->index(lastRow, 0));
+  }
 }
 
 void MainWindow::adjustHeader()

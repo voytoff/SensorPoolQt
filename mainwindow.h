@@ -18,10 +18,17 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 public:
     explicit MainWindow(const QString &artistTable, QWidget *parent = nullptr);
+    const QString Company = "NIIHM";
+    const QString AppName = "SensorPool";
+
+protected:
+    void closeEvent(QCloseEvent *event) override;
+
 private slots:
     void adjustHeader();
-    void addAlbum();
+    void addSensor();
     void about();
+    void treeDoubleClick();
 
 private:
     //QTableView *view;
@@ -29,6 +36,7 @@ private:
     SensorModel *table;
     QGroupBox *createSensorBox();
     void createMenuBar();
+    void restoreLayout();
 
 signals:
 };

@@ -4,7 +4,7 @@
     "Active": false,
     "Name": "BRM",
     "SensorHost": "192.168.0.100",
-    "SensorPort": 0,
+    "SensorPort": 25,
     "SensorConverter": "80a554ee-62b0-4581-87cb-55c6a1039191",
     "ChannelName": "БАР",
     "Description": "Барометр",

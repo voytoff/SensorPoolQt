@@ -20,7 +20,7 @@ qt_standard_project_setup()
 set(RESOURCE_FILES res.qrc)
 qt6_add_resources(PROJECT_RESOURCES ${RESOURCE_FILES})
 
-qt_add_executable(appSensorPool
+qt_add_executable(SensorPool
     main.cpp
     mainwindow.h mainwindow.cpp
     ${PROJECT_RESOURCES}
@@ -29,22 +29,22 @@ qt_add_executable(appSensorPool
 
 )
 
-set_target_properties(appSensorPool PROPERTIES
-#    MACOSX_BUNDLE_GUI_IDENTIFIER com.example.appSensorPool
+set_target_properties(SensorPool PROPERTIES
+#    MACOSX_BUNDLE_GUI_IDENTIFIER com.example.SensorPool
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
 )
 
-target_link_libraries(appSensorPool PRIVATE
+target_link_libraries(SensorPool PRIVATE
     Qt6::Widgets
     Qt6::Quick
     Qt6::Gui
 )
 
 include(GNUInstallDirs)
-install(TARGETS appSensorPool
+install(TARGETS SensorPool
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )

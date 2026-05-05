@@ -9,6 +9,7 @@
 #include <QVariant>
 
 struct Sensor {
+  //Sensor() {Oid = QUuid();}
   QUuid Oid;
   QString Name;
   bool Active;
@@ -78,19 +79,21 @@ class SensorModel: public QAbstractTableModel {
     int rowCount(const QModelIndex &parent) const override;
     int columnCount(const QModelIndex &parent) const override;
     QVariant data(const QModelIndex &index, int role) const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+    const Sensor* get(const int row);
 private:
     Sensor addEntry(
-        QUuid oid,
-        QString name,
-        bool active,
-        QString sensorHost,
-        int sensorPort,
-        QString sensorConverter,
-        QString channelName,
-        QString description,
-        QString unit,
-        int quantity
-        );
+      QUuid oid,
+      QString name,
+      bool active,
+      QString sensorHost,
+      int sensorPort,
+      QString sensorConverter,
+      QString channelName,
+      QString description,
+      QString unit,
+      int quantity
+    );
     void addEntry(const Sensor &sensor);
     QList<Sensor> sensors;
 };

@@ -21,7 +21,7 @@ int SensorModel::rowCount(const QModelIndex &parent) const
 
 int SensorModel::columnCount(const QModelIndex &parent) const
 {
-  return parent.isValid() ? 0 : 10;
+  return parent.isValid() ? 0 : 5;
 }
 
 QVariant SensorModel::data(const QModelIndex &index, int role) const
@@ -29,49 +29,57 @@ QVariant SensorModel::data(const QModelIndex &index, int role) const
   if (!index.isValid())
     return QVariant();
 
-  if (index.row() >= sensors.size() || index.row() < 0)
-    return QVariant();
-  QUuid Oid;
-  QString Name;
-  bool Active;
-  QString SensorHost;
-  int SensorPort;
-  QString SensorConverter;
-  QString ChannelName;
-  QString Description;
-  QString Unit;
-  int Quantity;
-
+  if (index.row() >= sensors.size() || index.row() < 0) return QVariant();
 
   if (role == Qt::DisplayRole) {
-    const auto &contact = sensors.at(index.row());
+    const auto &sensor = sensors.at(index.row());
 
     switch (index.column()) {
     case 0:
-      return contact.Oid;
+      return sensor.Active;
     case 1:
-      return contact.Name;
+      return sensor.Name;
     case 2:
-      return contact.Active;
+      return QString("%1:%2").arg(sensor.SensorHost).arg(sensor.SensorPort);
     case 3:
-      return contact.SensorHost;
+      return sensor.ChannelName;
     case 4:
-      return contact.SensorPort;
-    case 5:
-      return contact.SensorConverter;
-    case 6:
-      return contact.ChannelName;
-    case 7:
-      return contact.Description;
-    case 8:
-      return contact.Unit;
-    case 9:
-      return contact.Quantity;
+      return sensor.Quantity;
     default:
       break;
     }
   }
   return QVariant();
+}
+QVariant SensorModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+  if (role != Qt::DisplayRole)
+    return QVariant();
+
+  if (orientation == Qt::Horizontal) {
+    switch (section) {
+    case 0:
+      return tr("#");
+    case 1:
+      return tr("Название");
+    case 2:
+      return tr("Адрес");
+    case 3:
+      return tr("Имя канала");
+    case 4:
+      return tr("Частота");
+    default:
+      break;
+    }
+  }
+  return QVariant();
+}
+
+const Sensor* SensorModel::get(const int row)
+{
+  if (row >= sensors.size() || row < 0) return nullptr;
+  const auto &sensor = sensors.at(row);
+  return &sensor;
 }
 
 int SensorModel::readFromFile()
