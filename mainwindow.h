@@ -28,13 +28,14 @@ private slots:
     void adjustHeader();
     void addSensor();
     void about();
-    void treeDoubleClick();
+    void editSensor();
+    void save();
 
 private:
     //QTableView *view;
     QTreeView *view;
-    SensorModel *table;
-    QGroupBox *createSensorBox();
+    SensorModel *model;
+    QGroupBox *createSensorBox(const QString text);
     void createMenuBar();
     void restoreLayout();
 

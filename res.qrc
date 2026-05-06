@@ -5,5 +5,6 @@
         <file>images/tb/add.svg</file>
         <file>images/tb/del.svg</file>
         <file>images/sensor.svg</file>
+        <file>images/tb/save.svg</file>
     </qresource>
 </RCC>

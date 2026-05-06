@@ -16,17 +16,19 @@
 #include <QStatusBar>
 #include <QSettings>
 #include <QModelIndex>
+#include <QCloseEvent>
 
+#include "mainwindow.h"
 #include "sensorproperties.h"
 
 MainWindow::MainWindow(const QString &artistTable, QWidget *parent)
-  : QMainWindow{parent},
-  table(new SensorModel(this))
+  : QMainWindow{parent}
+  , model(new SensorModel(this))
 {
   this->setWindowIcon(QIcon(":/images/sensor.svg"));
-  table->readFromFile();
+  model->readFromFile();
 
-  QGroupBox *sensorList = createSensorBox();
+  QGroupBox *sensorList = createSensorBox("Датчики");
 
   QGridLayout *layout = new QGridLayout;
   layout->addWidget(sensorList, 0, 0);
@@ -45,45 +47,41 @@ MainWindow::MainWindow(const QString &artistTable, QWidget *parent)
 
 void MainWindow::closeEvent(QCloseEvent *event) {
   QSettings settings(Company, AppName);
-  settings.setValue("geometry", saveGeometry()); // Saves window size/position
-  settings.setValue("windowState", saveState()); // Saves dock/toolbar layout
+  settings.setValue("geometry", saveGeometry());
+  settings.setValue("windowState", saveState());
+
   QMainWindow::closeEvent(event);
 }
 
 void MainWindow::createMenuBar()
 {
-    QAction *addAction = new QAction(QIcon(":/images/tb/add.svg"), tr("Добавить датчик..."), this);
-    QAction *deleteAction = new QAction(QIcon(":/images/tb/del.svg"), tr("Удалить текущий..."), this);
-    QAction *quitAction = new QAction(QIcon(":/images/tb/exit.svg"), tr("&Quit"), this);
-    QAction *aboutAction = new QAction(tr("&About"), this);
-    QAction *aboutQtAction = new QAction(tr("About &Qt"), this);
+  QAction *addAction = new QAction(QIcon(":/images/tb/add.svg"), tr("Добавить датчик..."), this);
+  QAction *deleteAction = new QAction(QIcon(":/images/tb/del.svg"), tr("Удалить текущий..."), this);
+  QAction *quitAction = new QAction(QIcon(":/images/tb/exit.svg"), tr("&Quit"), this);
+  QAction *aboutAction = new QAction(tr("&About"), this);
+  QAction *aboutQtAction = new QAction(tr("About &Qt"), this);
+  QAction *saveAction = new QAction(QIcon(":/images/tb/save.svg"), tr("Сохранить"), this);
 
-    addAction->setShortcut(QKeySequence(Qt::CTRL|Qt::Key_A));
-    deleteAction->setShortcut(tr("Ctrl+D"));
-    quitAction->setShortcuts(QKeySequence::Quit);
+  addAction->setShortcut(QKeySequence(Qt::CTRL|Qt::Key_A));
+  deleteAction->setShortcut(tr("Ctrl+D"));
+  quitAction->setShortcuts(QKeySequence::Quit);
+  saveAction->setShortcuts(QKeySequence::Save);
 
-    QMenu *fileMenu = menuBar()->addMenu(tr("&Файл"));
-    fileMenu->addAction(addAction);
-    fileMenu->addAction(deleteAction);
-    fileMenu->addSeparator();
-    fileMenu->addAction(quitAction);
+  QMenu *fileMenu = menuBar()->addMenu(tr("&Файл"));
+  fileMenu->addAction(addAction);
+  fileMenu->addAction(deleteAction);
+  fileMenu->addSeparator();
+  fileMenu->addAction(saveAction);
+  fileMenu->addSeparator();
+  fileMenu->addAction(quitAction);
 
-    QMenu *helpMenu = menuBar()->addMenu(tr("&?"));
-    helpMenu->addAction(aboutAction);
-    helpMenu->addAction(aboutQtAction);
+  QMenu *helpMenu = menuBar()->addMenu(tr("&?"));
+  helpMenu->addAction(aboutAction);
+  helpMenu->addAction(aboutQtAction);
 
-    connect(addAction, &QAction::triggered,
-            this, &MainWindow::addSensor);
-    connect(aboutAction, &QAction::triggered,
-            this, &MainWindow::about);
-    /*
-    connect(deleteAction, &QAction::triggered,
-            this, &MainWindow::deleteAlbum);
-    connect(quitAction, &QAction::triggered,
-            qApp, &QCoreApplication::quit);
-    connect(aboutQtAction, &QAction::triggered,
-            qApp, &QApplication::aboutQt);
-*/
+  connect(addAction, &QAction::triggered, this, &MainWindow::addSensor);
+  connect(aboutAction, &QAction::triggered, this, &MainWindow::about);
+  connect(saveAction, &QAction::triggered, this, &MainWindow::save);
 }
 
 void MainWindow::restoreLayout()
@@ -93,82 +91,88 @@ void MainWindow::restoreLayout()
   restoreState(settings.value("windowState").toByteArray());
 }
 
-QGroupBox *MainWindow::createSensorBox()
+QGroupBox *MainWindow::createSensorBox(const QString text)
 {
-    QGroupBox *box = new QGroupBox(tr("Sensors"));
+  QGroupBox *box = new QGroupBox(text);
 
   view = new QTreeView;// QTableView;
-    //view->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    //view->setSortingEnabled(true);
-    //view->setSelectionBehavior(QAbstractItemView::SelectRows);
-    //view->setSelectionMode(QAbstractItemView::SingleSelection);
-    //view->setShowGrid(false);
-    //view->verticalHeader()->hide();
-    //view->setAlternatingRowColors(true);
-    view->setModel(table);
-    adjustHeader();
+  //view->setEditTriggers(QAbstractItemView::NoEditTriggers);
+  //view->setSortingEnabled(true);
+  //view->setSelectionBehavior(QAbstractItemView::SelectRows);
+  //view->setSelectionMode(QAbstractItemView::SingleSelection);
+  //view->setShowGrid(false);
+  //view->verticalHeader()->hide();
+  //view->setAlternatingRowColors(true);
+  view->setModel(model);
+  adjustHeader();
 
-    view->setRootIsDecorated(false);
-    view->setAlternatingRowColors(true);
-    view->setSortingEnabled(true);
-    connect(view, &QTreeView::doubleClicked, this, &MainWindow::treeDoubleClick);
+  view->setRootIsDecorated(false);
+  view->setAlternatingRowColors(true);
+  view->setSortingEnabled(true);
+  connect(view, &QTreeView::doubleClicked, this, &MainWindow::editSensor);
+  /*
+  connect(view, &QTableView::clicked, this, &MainWindow::showAlbumDetails);
+  connect(view, &QTableView::activated, this, &MainWindow::showAlbumDetails);
+  */
 
-    QLocale locale = view->locale();
-    locale.setNumberOptions(QLocale::OmitGroupSeparator);
-    view->setLocale(locale);
-    /*
-    connect(view, &QTableView::clicked,
-            this, &MainWindow::showAlbumDetails);
-    connect(view, &QTableView::activated,
-            this, &MainWindow::showAlbumDetails);
-    */
-    QVBoxLayout *layout = new QVBoxLayout;
-    layout->addWidget(view, 0, {});
-    box->setLayout(layout);
+  QLocale locale = view->locale();
+  locale.setNumberOptions(QLocale::OmitGroupSeparator);
+  view->setLocale(locale);
 
-    return box;
+  CustomDelegate *delegate = new CustomDelegate();
+  view->setItemDelegateForColumn(1, delegate);
+
+  QVBoxLayout *layout = new QVBoxLayout;
+  layout->addWidget(view, 0, {});
+  box->setLayout(layout);
+
+  return box;
 }
 
 void MainWindow::about()
 {
-    QMessageBox::about(this, tr("About Music Archive"),
-                       tr("<p>The <b>Sensor pull</b> программа записи параметров "
-                          "обработки экспериментов с датчиков регистрации.</p>"));
+    QMessageBox::about(
+      this,
+      tr("About Music Archive"),
+      tr("<p><b>Sensor Pool</b> программа записи параметров "
+         "обработки экспериментов с датчиков регистрации.</p>"));
 }
 
-void MainWindow::addSensor()
-{
-  Sensor sensor{QUuid()};
+void MainWindow::addSensor() {
+  Sensor sensor {QUuid()};
   SensorProperties *dialog = new SensorProperties(sensor, this);
   int accepted = dialog->exec();
 
-  if (accepted == QDialog::Accepted) {
-    //int lastRow = model->rowCount() - 1;
-    //view->selectRow(lastRow);
+  if (accepted == QDialog::Accepted && sensor.valid()) {
+    model->add(sensor);
+    view->setCurrentIndex(model->last());
     view->scrollToBottom();
-    //showAlbumDetails(model->index(lastRow, 0));
   }
 }
 
-void MainWindow::treeDoubleClick()
-{
-  Sensor sensor = *table->get(0);
+void MainWindow::editSensor() {
+  QModelIndex index = view->currentIndex();
+  if (index.isValid()) {
+    Sensor sensor = *model->get(index.row());
 
-  SensorProperties *dialog = new SensorProperties(sensor, this);
-  int accepted = dialog->exec();
-
-  if (accepted == QDialog::Accepted) {
-    //int lastRow = model->rowCount() - 1;
-    //view->selectRow(lastRow);
-    view->scrollToBottom();
-    //showAlbumDetails(model->index(lastRow, 0));
+    SensorProperties *dialog = new SensorProperties(sensor, this);
+    int accepted = dialog->exec();
+    if (accepted == QDialog::Accepted && sensor.valid()) {
+      model->replace(index.row(), sensor);
+    }
   }
+}
+
+void MainWindow::save() {
+  model->saveToFile();
 }
 
 void MainWindow::adjustHeader()
 {
-    view->hideColumn(0);
-    //view->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
-    view->resizeColumnToContents(2);
-    view->resizeColumnToContents(3);
+  for (int n = 0; n < model->columnCount(QModelIndex()); n++)
+    if (!model->visible(n))
+      view->hideColumn(n);
+  view->resizeColumnToContents(0);
+  view->resizeColumnToContents(1);
+  view->resizeColumnToContents(3);
 }

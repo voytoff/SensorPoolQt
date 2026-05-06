@@ -1,6 +1,7 @@
 #include <QBindable>
 #include <QRegularExpression>
 #include <QRegularExpressionValidator>
+#include <QCloseEvent>
 
 #include "sensorproperties.h"
 #include "ui_sensorproperties.h"
@@ -8,6 +9,7 @@
 SensorProperties::SensorProperties(Sensor &sensor, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::SensorProperties)
+    , sensor(sensor)
 {
   ui->setupUi(this);
 
@@ -18,6 +20,10 @@ SensorProperties::SensorProperties(Sensor &sensor, QWidget *parent)
   ui->sensorHost->setValidator(validator);
   ui->sensorHost->setInputMask("000.000.000.000;_");
 
+  ui->quantity->addItem("1", 1);
+  ui->quantity->addItem("10", 10);
+  ui->quantity->addItem("100", 100);
+
   ui->name->setText(sensor.Name);
   ui->active->setChecked(sensor.Active);
   ui->sensorHost->setText(sensor.SensorHost);
@@ -26,10 +32,31 @@ SensorProperties::SensorProperties(Sensor &sensor, QWidget *parent)
   ui->channelName->setText(sensor.ChannelName);
   ui->description->setText(sensor.Description);
   ui->unit->setCurrentText(sensor.Unit);
-  ui->quantity->setValue(sensor.Quantity);
+  ui->quantity->setCurrentText(QString::number(sensor.Quantity));
+
+  connect(this, &QDialog::finished, this, [this](int result) {
+    accept(result);
+  });
 }
 
-SensorProperties::~SensorProperties()
-{
-    delete ui;
+SensorProperties::~SensorProperties() {
+  delete ui;
+}
+
+void SensorProperties::closeEvent(QCloseEvent *event) {
+}
+
+void SensorProperties::accept(const int result) {
+  qDebug() << "Dialog closed with result:" << result;
+  if (result == QDialog::Accepted) {
+    sensor.Name = ui->name->text();
+    sensor.Active = ui->active->isChecked();
+    sensor.SensorHost = ui->sensorHost->text();
+    sensor.SensorPort = ui->sensorPort->value();
+    sensor.SensorConverter = ui->sensorConverter->currentText();
+    sensor.ChannelName = ui->channelName->text();
+    sensor.Description = ui->description->text();
+    sensor.Unit = ui->unit->currentText();
+    sensor.Quantity = ui->quantity->currentText().toInt();
+  }
 }
