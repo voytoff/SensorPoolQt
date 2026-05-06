@@ -6,8 +6,6 @@
 #include <QJsonParseError>
 #include <QJsonArray>
 #include <QJsonObject>
-#include <QStandardPaths>
-#include <QDir>
 
 SensorModel::SensorModel(QObject *parent)
     : QAbstractTableModel(parent) {
@@ -125,53 +123,43 @@ void SensorModel::replace(int row, const Sensor sensor) {
 }
 
 int SensorModel::readFromFile() {
-  QFile file(":/db.json");
-
-  if (!file.open(QIODevice::ReadOnly|QIODevice::Text)) {
-    throw file.error();
-  }
-
   sensors.clear();
-  // 1 Binnary
-  //QDataStream in(&file);
-  //in >> sensors;
+  QFile file(getDbName());
+  if (file.exists()) {
+    if (!file.open(QIODevice::ReadOnly|QIODevice::Text)) {
+      qWarning() << "file open error:" << file.error();
+      throw file.error();
+    }
 
-  // 2. Json
-  QByteArray rawData = file.readAll();
-  file.close();
+    QByteArray rawData = file.readAll();
+    file.close();
 
-  QJsonParseError error;
-  QJsonDocument doc = QJsonDocument::fromJson(rawData, &error);
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(rawData, &error);
 
-  if (error.error != QJsonParseError::NoError) {
-    qWarning() << "JSON parse error:" << error.errorString();
-    return EXIT_FAILURE;
-  }
+    if (error.error != QJsonParseError::NoError) {
+      qWarning() << "JSON parse error:" << error.errorString();
+      return EXIT_FAILURE;
+    }
+    if (doc.isArray()) {
+      QJsonArray jsonArray = doc.array();
 
-  if (doc.isArray()) {
-    QJsonArray jsonArray = doc.array();
-
-    for (const QJsonValue &value : std::as_const(jsonArray)) {
-      QJsonObject obj = value.toObject();
-      Sensor sensor;
-      obj >> sensor;
-      addEntry(sensor);
+      for (const QJsonValue &value : std::as_const(jsonArray)) {
+        Sensor sensor;
+        value.toObject() >> sensor;
+        add(sensor);
+      }
     }
   }
 
   return EXIT_SUCCESS;
 }
 
-void SensorModel::saveToFile()
-{
-  QString writableDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-  QDir().mkpath(writableDir);
-  QString filePath = writableDir + "/db.json";
-
-  QFile file(filePath);//":/db.json");
+void SensorModel::saveToFile() {
+  QFile file(getDbName());
   if (file.open(QIODevice::WriteOnly|QIODevice::Text)) {
     QJsonArray jsonArray;
-    for (const Sensor sensor : sensors) {
+    for (const auto &sensor : std::as_const(sensors)) {
       QJsonObject obj;
       obj << sensor;
       jsonArray.append(obj);
@@ -186,9 +174,10 @@ void SensorModel::saveToFile()
   }
 }
 
-void SensorModel::addEntry(const Sensor &sensor)
-{
-  sensors.append(sensor);
+QString SensorModel::getDbName() {
+  auto result = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+  QDir().mkpath(result);
+  return result + "/db.json";
 }
 
 Sensor SensorModel::addEntry(
@@ -204,7 +193,7 @@ Sensor SensorModel::addEntry(
   int quantity
   ) {
   Sensor sensor {oid, name, active, sensorHost, sensorPort, sensorConverter, channelName, description, unit, quantity};
-  addEntry(sensor);
+  add(sensor);
   return sensor;
 }
 

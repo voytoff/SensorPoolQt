@@ -9,6 +9,9 @@
 #include <QVariant>
 #include <QStyledItemDelegate>
 #include <QPainter>
+#include <QFont>
+#include <QStandardPaths>
+#include <QDir>
 
 struct Sensor {
   //Sensor() {Oid = QUuid();}
@@ -79,15 +82,14 @@ inline QJsonObject operator<<(QJsonObject &obj, const Sensor &sensor) {
   obj["Name"] = sensor.Name;
   obj["Active"] = sensor.Active;
   obj["SensorHost"] = sensor.SensorHost;
-  obj["SensorPort"] = QString::number(sensor.SensorPort);
+  obj["SensorPort"] = sensor.SensorPort;
   obj["SensorConverter"] = sensor.SensorConverter;
   obj["ChannelName"] = sensor.ChannelName;
   obj["Description"] = sensor.Description;
   obj["Unit"] = sensor.Unit;
-  obj["Quantity"] = QString::number(sensor.Quantity);
+  obj["Quantity"] = sensor.Quantity;
   return obj;
 }
-
 
 class SensorModel: public QAbstractTableModel {
   Q_OBJECT
@@ -96,6 +98,7 @@ class SensorModel: public QAbstractTableModel {
     SensorModel(const QList<Sensor> &sensors, QObject *parent = nullptr);
     int readFromFile();
     void saveToFile();
+    QString getDbName();
     int rowCount(const QModelIndex &parent) const override;
     int columnCount(const QModelIndex &parent) const override;
     QVariant data(const QModelIndex &index, int role) const override;
@@ -121,7 +124,7 @@ private:
       QString unit,
       int quantity
     );
-    void addEntry(const Sensor &sensor);
+
     QList<Sensor> sensors;
 };
 
@@ -129,13 +132,13 @@ private:
 class CustomDelegate : public QStyledItemDelegate {
   public:
   void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override {
-    // Custom drawing logic here
-    //QStyledItemDelegate::paint(painter, option, index);
-    painter->save();
-    painter->setPen(Qt::blue);
-    painter->drawText(option.rect, Qt::AlignCenter, option.text);
-    painter->restore();
-
+    if (index.column() == 1) {
+      QStyleOptionViewItem opt = option;
+      opt.font.setBold(true);
+      initStyleOption(&opt, index);
+      QStyledItemDelegate::paint(painter, opt, index);
+    } else
+      QStyledItemDelegate::paint(painter, option, index);
   }
 
 };

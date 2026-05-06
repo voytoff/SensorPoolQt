@@ -37,14 +37,15 @@ SensorProperties::SensorProperties(Sensor &sensor, QWidget *parent)
   connect(this, &QDialog::finished, this, [this](int result) {
     accept(result);
   });
+
+  setWindowFlags(Qt::Dialog|Qt::MSWindowsFixedSizeDialogHint);
 }
 
 SensorProperties::~SensorProperties() {
   delete ui;
 }
 
-void SensorProperties::closeEvent(QCloseEvent *event) {
-}
+void SensorProperties::closeEvent(QCloseEvent *event) { }
 
 void SensorProperties::accept(const int result) {
   qDebug() << "Dialog closed with result:" << result;

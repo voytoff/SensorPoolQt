@@ -17,6 +17,7 @@
 #include <QSettings>
 #include <QModelIndex>
 #include <QCloseEvent>
+#include <QStyleHints>
 
 #include "mainwindow.h"
 #include "sensorproperties.h"
@@ -40,6 +41,8 @@ MainWindow::MainWindow(const QString &artistTable, QWidget *parent)
   widget->setLayout(layout);
   setCentralWidget(widget);
 
+  //QGuiApplication::styleHints()->setColorScheme(Qt::ColorScheme::Light);
+
   createMenuBar();
   statusBar()->setSizeGripEnabled(true);
   restoreLayout();
@@ -49,6 +52,8 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   QSettings settings(Company, AppName);
   settings.setValue("geometry", saveGeometry());
   settings.setValue("windowState", saveState());
+
+  model->saveToFile();
 
   QMainWindow::closeEvent(event);
 }
@@ -96,13 +101,6 @@ QGroupBox *MainWindow::createSensorBox(const QString text)
   QGroupBox *box = new QGroupBox(text);
 
   view = new QTreeView;// QTableView;
-  //view->setEditTriggers(QAbstractItemView::NoEditTriggers);
-  //view->setSortingEnabled(true);
-  //view->setSelectionBehavior(QAbstractItemView::SelectRows);
-  //view->setSelectionMode(QAbstractItemView::SingleSelection);
-  //view->setShowGrid(false);
-  //view->verticalHeader()->hide();
-  //view->setAlternatingRowColors(true);
   view->setModel(model);
   adjustHeader();
 
@@ -110,17 +108,13 @@ QGroupBox *MainWindow::createSensorBox(const QString text)
   view->setAlternatingRowColors(true);
   view->setSortingEnabled(true);
   connect(view, &QTreeView::doubleClicked, this, &MainWindow::editSensor);
-  /*
-  connect(view, &QTableView::clicked, this, &MainWindow::showAlbumDetails);
-  connect(view, &QTableView::activated, this, &MainWindow::showAlbumDetails);
-  */
 
   QLocale locale = view->locale();
   locale.setNumberOptions(QLocale::OmitGroupSeparator);
   view->setLocale(locale);
 
   CustomDelegate *delegate = new CustomDelegate();
-  view->setItemDelegateForColumn(1, delegate);
+  view->setItemDelegate(delegate);
 
   QVBoxLayout *layout = new QVBoxLayout;
   layout->addWidget(view, 0, {});
