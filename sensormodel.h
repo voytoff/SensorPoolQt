@@ -96,8 +96,8 @@ class SensorModel: public QAbstractTableModel {
   public:
     SensorModel(QObject *parent = nullptr);
     SensorModel(const QList<Sensor> &sensors, QObject *parent = nullptr);
-    int readFromFile();
-    void saveToFile();
+    int read();
+    void write();
     QString getDbName();
     int rowCount(const QModelIndex &parent) const override;
     int columnCount(const QModelIndex &parent) const override;
@@ -132,16 +132,20 @@ private:
 class CustomDelegate : public QStyledItemDelegate {
   public:
   void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override {
-    if (index.column() == 1) {
-      QStyleOptionViewItem opt = option;
-      opt.font.setBold(true);
-      initStyleOption(&opt, index);
-      QStyledItemDelegate::paint(painter, opt, index);
-    } else
-      QStyledItemDelegate::paint(painter, option, index);
+    if (index.column() == 1/*Name*/) {
+      QModelIndex active = index.sibling(index.row(), 2/*Active*/);
+      QVariant bold = active.data(Qt::DisplayRole);
+      if (bold.isValid() && bold.toBool()) {
+        QStyleOptionViewItem opt = option;
+        opt.font.setBold(true);
+        initStyleOption(&opt, index);
+        QStyledItemDelegate::paint(painter, opt, index);
+        return;
+      }
+    }
+    QStyledItemDelegate::paint(painter, option, index);
   }
 
 };
-
 
 #endif // SENSORMODEL_H

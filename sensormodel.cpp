@@ -122,7 +122,7 @@ void SensorModel::replace(int row, const Sensor sensor) {
   sensors.replace(row, sensor);
 }
 
-int SensorModel::readFromFile() {
+int SensorModel::read() {
   sensors.clear();
   QFile file(getDbName());
   if (file.exists()) {
@@ -155,7 +155,7 @@ int SensorModel::readFromFile() {
   return EXIT_SUCCESS;
 }
 
-void SensorModel::saveToFile() {
+void SensorModel::write() {
   QFile file(getDbName());
   if (file.open(QIODevice::WriteOnly|QIODevice::Text)) {
     QJsonArray jsonArray;

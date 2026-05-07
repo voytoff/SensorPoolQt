@@ -26,6 +26,8 @@ qt_add_executable(SensorPull
     ${PROJECT_RESOURCES}
     sensorproperties.h sensorproperties.cpp sensorproperties.ui
     sensormodel.h sensormodel.cpp
+    themeicons.h themeicons.cpp themeicons.ui
+
 
 )
 

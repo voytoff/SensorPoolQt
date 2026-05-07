@@ -30,12 +30,14 @@ private slots:
     void about();
     void editSensor();
     void save();
+    void showIcons();
 
 private:
     //QTableView *view;
     QTreeView *view;
     SensorModel *model;
     QGroupBox *createSensorBox(const QString text);
+    QGroupBox *createControlBox(const QString text);
     void createMenuBar();
     void restoreLayout();
 

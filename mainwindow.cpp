@@ -2,7 +2,6 @@
 #include <QApplication>
 #include <QComboBox>
 #include <QFile>
-#include <QGridLayout>
 #include <QGroupBox>
 #include <QHeaderView>
 #include <QLabel>
@@ -18,30 +17,39 @@
 #include <QModelIndex>
 #include <QCloseEvent>
 #include <QStyleHints>
+#include <QGridLayout>
+#include <QBoxLayout>
+#include <QButtonGroup>
+#include <QSplitter>
 
 #include "mainwindow.h"
 #include "sensorproperties.h"
+#include "themeicons.h"
 
 MainWindow::MainWindow(const QString &artistTable, QWidget *parent)
   : QMainWindow{parent}
   , model(new SensorModel(this))
 {
-  this->setWindowIcon(QIcon(":/images/sensor.svg"));
-  model->readFromFile();
+  QIcon::setThemeName("Material Symbols Outlined");
+  QGuiApplication::styleHints()->setColorScheme(Qt::ColorScheme::Dark);
+  this->setWindowIcon(QIcon::fromTheme(QIcon::ThemeIcon::NetworkWired));
 
-  QGroupBox *sensorList = createSensorBox("Датчики");
+  model->read();
+
+  auto *sensorList = createSensorBox("Датчики");
+  auto controlBox = createControlBox("Управление");
+  //auto splitter = new QSplitter(this);
+  //splitter->addWidget(sensorList);
+  //splitter->addWidget(controlBox);
 
   QGridLayout *layout = new QGridLayout;
   layout->addWidget(sensorList, 0, 0);
-  //layout->addWidget(new QSizeGrip(this), 1, 0, Qt::AlignBottom | Qt::AlignRight);
-  //layout->setColumnStretch(1, 1);
-  //layout->setColumnMinimumWidth(0, 500);
+  //layout->addWidget(splitter, 0, 0);
+  layout->addWidget(controlBox, 0, 1);
 
   QWidget *widget = new QWidget;
   widget->setLayout(layout);
   setCentralWidget(widget);
-
-  //QGuiApplication::styleHints()->setColorScheme(Qt::ColorScheme::Light);
 
   createMenuBar();
   statusBar()->setSizeGripEnabled(true);
@@ -53,19 +61,18 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   settings.setValue("geometry", saveGeometry());
   settings.setValue("windowState", saveState());
 
-  model->saveToFile();
+  model->write();
 
   QMainWindow::closeEvent(event);
 }
 
-void MainWindow::createMenuBar()
-{
-  QAction *addAction = new QAction(QIcon(":/images/tb/add.svg"), tr("Добавить датчик..."), this);
-  QAction *deleteAction = new QAction(QIcon(":/images/tb/del.svg"), tr("Удалить текущий..."), this);
-  QAction *quitAction = new QAction(QIcon(":/images/tb/exit.svg"), tr("&Quit"), this);
-  QAction *aboutAction = new QAction(tr("&About"), this);
-  QAction *aboutQtAction = new QAction(tr("About &Qt"), this);
-  QAction *saveAction = new QAction(QIcon(":/images/tb/save.svg"), tr("Сохранить"), this);
+void MainWindow::createMenuBar() {
+  QAction *addAction = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::ListAdd), tr("Добавить датчик..."), this); // QIcon(":/images/tb/add.svg")
+  QAction *deleteAction = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::EditDelete), tr("Удалить текущий..."), this); // QIcon(":/images/tb/del.svg")
+  QAction *quitAction = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::ApplicationExit), tr("&Quit"), this); // QIcon(":/images/tb/exit.svg")
+  QAction *aboutAction = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::HelpAbout), tr("&About"), this);
+  QAction *saveAction = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::DocumentSave), tr("Сохранить"), this); // QIcon(":/images/tb/save.svg")
+  QAction *iconsAction = new QAction(tr("Просмотр иконок..."), this);
 
   addAction->setShortcut(QKeySequence(Qt::CTRL|Qt::Key_A));
   deleteAction->setShortcut(tr("Ctrl+D"));
@@ -82,11 +89,13 @@ void MainWindow::createMenuBar()
 
   QMenu *helpMenu = menuBar()->addMenu(tr("&?"));
   helpMenu->addAction(aboutAction);
-  helpMenu->addAction(aboutQtAction);
+  helpMenu->addAction(iconsAction);
 
   connect(addAction, &QAction::triggered, this, &MainWindow::addSensor);
   connect(aboutAction, &QAction::triggered, this, &MainWindow::about);
   connect(saveAction, &QAction::triggered, this, &MainWindow::save);
+  connect(quitAction, &QAction::triggered, this, [this]() {close();});
+  connect(iconsAction, &QAction::triggered, this, &MainWindow::showIcons);
 }
 
 void MainWindow::restoreLayout()
@@ -96,11 +105,10 @@ void MainWindow::restoreLayout()
   restoreState(settings.value("windowState").toByteArray());
 }
 
-QGroupBox *MainWindow::createSensorBox(const QString text)
-{
+QGroupBox *MainWindow::createSensorBox(const QString text) {
   QGroupBox *box = new QGroupBox(text);
 
-  view = new QTreeView;// QTableView;
+  view = new QTreeView;
   view->setModel(model);
   adjustHeader();
 
@@ -113,11 +121,21 @@ QGroupBox *MainWindow::createSensorBox(const QString text)
   locale.setNumberOptions(QLocale::OmitGroupSeparator);
   view->setLocale(locale);
 
-  CustomDelegate *delegate = new CustomDelegate();
-  view->setItemDelegate(delegate);
+  view->setItemDelegate(new CustomDelegate());
 
-  QVBoxLayout *layout = new QVBoxLayout;
-  layout->addWidget(view, 0, {});
+  QBoxLayout *layout = new QBoxLayout(QBoxLayout::Direction::TopToBottom);
+  layout->addWidget(view);
+  box->setLayout(layout);
+
+  return box;
+}
+
+QGroupBox *MainWindow::createControlBox(const QString text) {
+  QGroupBox *box = new QGroupBox(text);
+  QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel, Qt::Orientation::Vertical, box);
+
+  QBoxLayout *layout = new QBoxLayout(QBoxLayout::Direction::TopToBottom);
+  layout->addWidget(buttons);
   box->setLayout(layout);
 
   return box;
@@ -158,7 +176,13 @@ void MainWindow::editSensor() {
 }
 
 void MainWindow::save() {
-  model->saveToFile();
+  model->write();
+}
+
+void MainWindow::showIcons()
+{
+  ThemeIcons *d = new ThemeIcons(this);
+  d->exec();
 }
 
 void MainWindow::adjustHeader()
