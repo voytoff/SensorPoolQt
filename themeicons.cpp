@@ -1,23 +1,24 @@
-#include <QIcon>
-#include <QMetaEnum>
 #include <QException>
-#include <QStackedWidget>
+#include <QIcon>
 #include <QLabel>
+#include <QMetaEnum>
+#include <QStackedWidget>
 
 #include "themeicons.h"
 #include "ui_themeicons.h"
 
 ThemeIcons::ThemeIcons(QWidget *parent)
-    : QDialog(parent)
-    , ui(new Ui::ThemeIcons)
+  : QDialog(parent)
+  , ui(new Ui::ThemeIcons)
 {
   ui->setupUi(this);
   QMetaEnum metaEnum = QMetaEnum::fromType<QIcon::ThemeIcon>();
   for (int i = 0; i < metaEnum.keyCount(); ++i) {
     try {
-      const auto* key = metaEnum.key(i);
-      QIcon::ThemeIcon value = (QIcon::ThemeIcon)metaEnum.value(i);
-      if (value == QIcon::ThemeIcon::NThemeIcons) continue;
+      const auto *key = metaEnum.key(i);
+      QIcon::ThemeIcon value = (QIcon::ThemeIcon) metaEnum.value(i);
+      if (value == QIcon::ThemeIcon::NThemeIcons)
+        continue;
       qDebug() << "Key:" << key << "Value:" << value;
 
       QIcon icon(QIcon::fromTheme(value));
@@ -29,7 +30,7 @@ ThemeIcons::ThemeIcons(QWidget *parent)
       QLabel *textLabel = new QLabel(key);
       ui->gridLayout->addWidget(textLabel, i, 1, 1, 1);
 
-    } catch (const std::exception& e) {
+    } catch (const std::exception &e) {
       qCritical() << "Exception caught in notify:" << e.what();
     } catch (...) {
       qCritical() << "Unknown exception caught in notify";
@@ -42,17 +43,19 @@ ThemeIcons::~ThemeIcons()
   delete ui;
 }
 
-QLabel *ThemeIcons::createImage(QMetaEnum *metaEnum, const int i) {
-  const auto* key = metaEnum->key(i);
-  QIcon::ThemeIcon value = (QIcon::ThemeIcon)metaEnum->value(i);
-  if (value == QIcon::ThemeIcon::NThemeIcons) return nullptr;
+QLabel *ThemeIcons::createImage(QMetaEnum *metaEnum, const int i)
+{
+  const auto *key = metaEnum->key(i);
+  QIcon::ThemeIcon value = (QIcon::ThemeIcon) metaEnum->value(i);
+  if (value == QIcon::ThemeIcon::NThemeIcons)
+    return nullptr;
   qDebug() << "Key:" << key << "Value:" << value;
 
   QIcon icon(QIcon::fromTheme(key));
   QLabel *iconLabel = new QLabel();
   iconLabel->setPixmap(icon.pixmap(QSize(32, 32)));
   return iconLabel;
-/*
+  /*
   QLabel *textLabel = new QLabel(QString(key));
 
   //QVBoxLayout *layout = new QVBoxLayout();

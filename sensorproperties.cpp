@@ -1,15 +1,15 @@
 #include <QBindable>
+#include <QCloseEvent>
 #include <QRegularExpression>
 #include <QRegularExpressionValidator>
-#include <QCloseEvent>
 
 #include "sensorproperties.h"
 #include "ui_sensorproperties.h"
 
 SensorProperties::SensorProperties(Sensor &sensor, QWidget *parent)
-    : QDialog(parent)
-    , ui(new Ui::SensorProperties)
-    , sensor(sensor)
+  : QDialog(parent)
+  , ui(new Ui::SensorProperties)
+  , sensor(sensor)
 {
   ui->setupUi(this);
 
@@ -34,20 +34,20 @@ SensorProperties::SensorProperties(Sensor &sensor, QWidget *parent)
   ui->unit->setCurrentText(sensor.Unit);
   ui->quantity->setCurrentText(QString::number(sensor.Quantity));
 
-  connect(this, &QDialog::finished, this, [this](int result) {
-    accept(result);
-  });
+  connect(this, &QDialog::finished, this, [this](int result) { accept(result); });
 
-  setWindowFlags(Qt::Dialog|Qt::MSWindowsFixedSizeDialogHint);
+  setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
 }
 
-SensorProperties::~SensorProperties() {
+SensorProperties::~SensorProperties()
+{
   delete ui;
 }
 
-void SensorProperties::closeEvent(QCloseEvent *event) { }
+void SensorProperties::closeEvent(QCloseEvent *event) {}
 
-void SensorProperties::accept(const int result) {
+void SensorProperties::accept(const int result)
+{
   qDebug() << "Dialog closed with result:" << result;
   if (result == QDialog::Accepted) {
     sensor.Name = ui->name->text();

@@ -2,8 +2,9 @@
 #define THEMEICONS_H
 
 #include <QDialog>
-#include <QVBoxLayout>
 #include <QStackedWidget>
+#include <QVBoxLayout>
+#include <QLabel>
 
 namespace Ui {
 class ThemeIcons;
@@ -13,13 +14,13 @@ class ThemeIcons : public QDialog
 {
   Q_OBJECT
 
-  public:
+public:
   explicit ThemeIcons(QWidget *parent = nullptr);
   ~ThemeIcons();
 
-  private:
+private:
   Ui::ThemeIcons *ui;
-      QLabel *createImage(QMetaEnum *metaEnum, const int i);
+  QLabel *createImage(QMetaEnum *metaEnum, const int i);
 };
 
 #endif // THEMEICONS_H

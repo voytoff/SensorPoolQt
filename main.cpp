@@ -11,10 +11,10 @@
 
 int main(int argc, char *argv[])
 {
-    QApplication app(argc, argv);
-    app.setStyle("fusion");
+  QApplication app(argc, argv);
+  app.setStyle("fusion");
 
-    MainWindow window("artists");
-    window.show();
-    return app.exec();
+  MainWindow window("artists");
+  window.show();
+  return app.exec();
 }

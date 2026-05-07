@@ -2,18 +2,19 @@
 #define SENSORMODEL_H
 
 #include <QAbstractTableModel>
-#include <QList>
-#include <QUuid>
+#include <QDir>
+#include <QFont>
 #include <QJsonArray>
 #include <QJsonObject>
-#include <QVariant>
-#include <QStyledItemDelegate>
+#include <QList>
 #include <QPainter>
-#include <QFont>
 #include <QStandardPaths>
-#include <QDir>
+#include <QStyledItemDelegate>
+#include <QUuid>
+#include <QVariant>
 
-struct Sensor {
+struct Sensor
+{
   //Sensor() {Oid = QUuid();}
   QUuid Oid;
   QString Name;
@@ -26,45 +27,31 @@ struct Sensor {
   QString Unit;
   int Quantity;
 
-  bool valid() {
-    if (Oid.isNull()) Oid = QUuid();
+  bool valid()
+  {
+    if (Oid.isNull())
+      Oid = QUuid();
     return true;
   }
 
-  bool operator==(const Sensor &other) const {
-    return Name == other.Name && Oid == other.Oid;
-  }
+  bool operator==(const Sensor &other) const { return Name == other.Name && Oid == other.Oid; }
 };
 
-
-inline QDataStream &operator<<(QDataStream &stream, const Sensor &sensor) {
-  return stream
-         << sensor.Oid
-         << sensor.Name
-         << sensor.Active
-         << sensor.SensorHost
-         << sensor.SensorPort
-         << sensor.SensorConverter
-         << sensor.ChannelName
-         << sensor.Description
-         << sensor.Unit
-         << sensor.Quantity;
+inline QDataStream &operator<<(QDataStream &stream, const Sensor &sensor)
+{
+  return stream << sensor.Oid << sensor.Name << sensor.Active << sensor.SensorHost
+                << sensor.SensorPort << sensor.SensorConverter << sensor.ChannelName
+                << sensor.Description << sensor.Unit << sensor.Quantity;
 }
 
-inline QDataStream &operator>>(QDataStream &stream, Sensor &sensor) {
-  return stream
-         >> sensor.Oid
-         >> sensor.Name
-         >> sensor.Active
-         >> sensor.SensorHost
-         >> sensor.SensorPort
-         >> sensor.SensorConverter
-         >> sensor.ChannelName
-         >> sensor.Description
-         >> sensor.Unit
-         >> sensor.Quantity;
+inline QDataStream &operator>>(QDataStream &stream, Sensor &sensor)
+{
+  return stream >> sensor.Oid >> sensor.Name >> sensor.Active >> sensor.SensorHost
+         >> sensor.SensorPort >> sensor.SensorConverter >> sensor.ChannelName
+         >> sensor.Description >> sensor.Unit >> sensor.Quantity;
 }
-inline Sensor operator>>(const QJsonObject &obj, Sensor &sensor) {
+inline Sensor operator>>(const QJsonObject &obj, Sensor &sensor)
+{
   sensor.Oid = QUuid(obj.value("Oid").toString());
   sensor.Name = obj.value("Name").toString();
   sensor.Active = obj.value("Active").toBool();
@@ -77,7 +64,8 @@ inline Sensor operator>>(const QJsonObject &obj, Sensor &sensor) {
   sensor.Quantity = obj.value("Quantity").toInt();
   return sensor;
 }
-inline QJsonObject operator<<(QJsonObject &obj, const Sensor &sensor) {
+inline QJsonObject operator<<(QJsonObject &obj, const Sensor &sensor)
+{
   obj["Oid"] = sensor.Oid.toString();
   obj["Name"] = sensor.Name;
   obj["Active"] = sensor.Active;
@@ -91,49 +79,53 @@ inline QJsonObject operator<<(QJsonObject &obj, const Sensor &sensor) {
   return obj;
 }
 
-class SensorModel: public QAbstractTableModel {
+class SensorModel : public QAbstractTableModel
+{
   Q_OBJECT
-  public:
-    SensorModel(QObject *parent = nullptr);
-    SensorModel(const QList<Sensor> &sensors, QObject *parent = nullptr);
-    int read();
-    void write();
-    QString getDbName();
-    int rowCount(const QModelIndex &parent) const override;
-    int columnCount(const QModelIndex &parent) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-    bool visible(int col) const;
-    QModelIndex ind(int row) const;
-    QModelIndex last() const;
-    QModelIndex first() const;
-    int count() const;
-    void add(Sensor sensor);
-    Sensor* get(int row);
-    void replace(int row, const Sensor sensor);
-private:
-    Sensor addEntry(
-      QUuid oid,
-      QString name,
-      bool active,
-      QString sensorHost,
-      int sensorPort,
-      QString sensorConverter,
-      QString channelName,
-      QString description,
-      QString unit,
-      int quantity
-    );
+public:
+  SensorModel(QObject *parent = nullptr);
+  SensorModel(const QList<Sensor> &sensors, QObject *parent = nullptr);
+  int read();
+  void write();
+  QString getDbName();
+  int rowCount(const QModelIndex &parent) const override;
+  int columnCount(const QModelIndex &parent) const override;
+  QVariant data(const QModelIndex &index, int role) const override;
+  QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+  bool visible(int col) const;
+  QModelIndex ind(int row) const;
+  QModelIndex last() const;
+  QModelIndex first() const;
+  int count() const;
+  void add(Sensor sensor);
+  Sensor *get(int row);
+  void replace(int row, const Sensor sensor);
 
-    QList<Sensor> sensors;
+private:
+  Sensor addEntry(
+    QUuid oid,
+    QString name,
+    bool active,
+    QString sensorHost,
+    int sensorPort,
+    QString sensorConverter,
+    QString channelName,
+    QString description,
+    QString unit,
+    int quantity);
+
+  QList<Sensor> sensors;
 };
 
-
-class CustomDelegate : public QStyledItemDelegate {
-  public:
-  void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override {
-    if (index.column() == 1/*Name*/) {
-      QModelIndex active = index.sibling(index.row(), 2/*Active*/);
+class CustomDelegate : public QStyledItemDelegate
+{
+public:
+  void paint(QPainter *painter,
+             const QStyleOptionViewItem &option,
+             const QModelIndex &index) const override
+  {
+    if (index.column() == 1 /*Name*/) {
+      QModelIndex active = index.sibling(index.row(), 2 /*Active*/);
       QVariant bold = active.data(Qt::DisplayRole);
       if (bold.isValid() && bold.toBool()) {
         QStyleOptionViewItem opt = option;
@@ -145,7 +137,6 @@ class CustomDelegate : public QStyledItemDelegate {
     }
     QStyledItemDelegate::paint(painter, option, index);
   }
-
 };
 
 #endif // SENSORMODEL_H

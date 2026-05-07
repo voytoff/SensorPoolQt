@@ -15,31 +15,31 @@ QT_FORWARD_DECLARE_CLASS(QTableView)
 
 class MainWindow : public QMainWindow
 {
-    Q_OBJECT
+  Q_OBJECT
 public:
-    explicit MainWindow(const QString &artistTable, QWidget *parent = nullptr);
-    const QString Company = "NIIHM";
-    const QString AppName = "SensorPool";
+  explicit MainWindow(const QString &artistTable, QWidget *parent = nullptr);
+  const QString Company = "NIIHM";
+  const QString AppName = "SensorPool";
 
 protected:
-    void closeEvent(QCloseEvent *event) override;
+  void closeEvent(QCloseEvent *event) override;
 
 private slots:
-    void adjustHeader();
-    void addSensor();
-    void about();
-    void editSensor();
-    void save();
-    void showIcons();
+  void adjustHeader();
+  void addSensor();
+  void about();
+  void editSensor();
+  void save();
+  void showIcons();
 
 private:
-    //QTableView *view;
-    QTreeView *view;
-    SensorModel *model;
-    QGroupBox *createSensorBox(const QString text);
-    QGroupBox *createControlBox(const QString text);
-    void createMenuBar();
-    void restoreLayout();
+  //QTableView *view;
+  QTreeView *view;
+  SensorModel *model;
+  QGroupBox *createSensorBox(const QString text);
+  QGroupBox *createControlBox(const QString text);
+  void createMenuBar();
+  void restoreLayout();
 
 signals:
 };

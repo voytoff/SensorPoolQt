@@ -1,26 +1,26 @@
 #include "mainwindow.h"
 #include <QApplication>
+#include <QBoxLayout>
+#include <QButtonGroup>
+#include <QCloseEvent>
 #include <QComboBox>
 #include <QFile>
+#include <QGridLayout>
 #include <QGroupBox>
 #include <QHeaderView>
+#include <QIcon>
 #include <QLabel>
 #include <QListWidget>
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
-#include <QTableView>
-#include <QIcon>
-#include <QSizeGrip>
-#include <QStatusBar>
-#include <QSettings>
 #include <QModelIndex>
-#include <QCloseEvent>
-#include <QStyleHints>
-#include <QGridLayout>
-#include <QBoxLayout>
-#include <QButtonGroup>
+#include <QSettings>
+#include <QSizeGrip>
 #include <QSplitter>
+#include <QStatusBar>
+#include <QStyleHints>
+#include <QTableView>
 
 #include "mainwindow.h"
 #include "sensorproperties.h"
@@ -56,7 +56,8 @@ MainWindow::MainWindow(const QString &artistTable, QWidget *parent)
   restoreLayout();
 }
 
-void MainWindow::closeEvent(QCloseEvent *event) {
+void MainWindow::closeEvent(QCloseEvent *event)
+{
   QSettings settings(Company, AppName);
   settings.setValue("geometry", saveGeometry());
   settings.setValue("windowState", saveState());
@@ -66,15 +67,16 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   QMainWindow::closeEvent(event);
 }
 
-void MainWindow::createMenuBar() {
-  QAction *addAction = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::ListAdd), tr("Добавить датчик..."), this); // QIcon(":/images/tb/add.svg")
-  QAction *deleteAction = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::EditDelete), tr("Удалить текущий..."), this); // QIcon(":/images/tb/del.svg")
-  QAction *quitAction = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::ApplicationExit), tr("&Quit"), this); // QIcon(":/images/tb/exit.svg")
+void MainWindow::createMenuBar()
+{
+  QAction *addAction = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::ListAdd), tr("Добавить датчик..."), this);
+  QAction *deleteAction = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::EditDelete), tr("Удалить текущий..."), this);
+  QAction *quitAction = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::ApplicationExit), tr("&Quit"), this);
   QAction *aboutAction = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::HelpAbout), tr("&About"), this);
-  QAction *saveAction = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::DocumentSave), tr("Сохранить"), this); // QIcon(":/images/tb/save.svg")
+  QAction *saveAction = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::DocumentSave), tr("Сохранить"), this);
   QAction *iconsAction = new QAction(tr("Просмотр иконок..."), this);
 
-  addAction->setShortcut(QKeySequence(Qt::CTRL|Qt::Key_A));
+  addAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_A));
   deleteAction->setShortcut(tr("Ctrl+D"));
   quitAction->setShortcuts(QKeySequence::Quit);
   saveAction->setShortcuts(QKeySequence::Save);
@@ -94,8 +96,10 @@ void MainWindow::createMenuBar() {
   connect(addAction, &QAction::triggered, this, &MainWindow::addSensor);
   connect(aboutAction, &QAction::triggered, this, &MainWindow::about);
   connect(saveAction, &QAction::triggered, this, &MainWindow::save);
-  connect(quitAction, &QAction::triggered, this, [this]() {close();});
+  connect(quitAction, &QAction::triggered, this, [this]() { close(); });
   connect(iconsAction, &QAction::triggered, this, &MainWindow::showIcons);
+
+  menuBar()->setNativeMenuBar(false);
 }
 
 void MainWindow::restoreLayout()
@@ -105,7 +109,8 @@ void MainWindow::restoreLayout()
   restoreState(settings.value("windowState").toByteArray());
 }
 
-QGroupBox *MainWindow::createSensorBox(const QString text) {
+QGroupBox *MainWindow::createSensorBox(const QString text)
+{
   QGroupBox *box = new QGroupBox(text);
 
   view = new QTreeView;
@@ -130,9 +135,10 @@ QGroupBox *MainWindow::createSensorBox(const QString text) {
   return box;
 }
 
-QGroupBox *MainWindow::createControlBox(const QString text) {
+QGroupBox *MainWindow::createControlBox(const QString text)
+{
   QGroupBox *box = new QGroupBox(text);
-  QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel, Qt::Orientation::Vertical, box);
+  QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Orientation::Vertical, box);
 
   QBoxLayout *layout = new QBoxLayout(QBoxLayout::Direction::TopToBottom);
   layout->addWidget(buttons);
@@ -143,15 +149,15 @@ QGroupBox *MainWindow::createControlBox(const QString text) {
 
 void MainWindow::about()
 {
-    QMessageBox::about(
-      this,
-      tr("About Music Archive"),
-      tr("<p><b>Sensor Pool</b> программа записи параметров "
-         "обработки экспериментов с датчиков регистрации.</p>"));
+  QMessageBox::about(this,
+                     tr("About Music Archive"),
+                     tr("<p><b>Sensor Pool</b> программа записи параметров "
+                        "обработки экспериментов с датчиков регистрации.</p>"));
 }
 
-void MainWindow::addSensor() {
-  Sensor sensor {QUuid()};
+void MainWindow::addSensor()
+{
+  Sensor sensor{QUuid()};
   SensorProperties *dialog = new SensorProperties(sensor, this);
   int accepted = dialog->exec();
 
@@ -162,7 +168,8 @@ void MainWindow::addSensor() {
   }
 }
 
-void MainWindow::editSensor() {
+void MainWindow::editSensor()
+{
   QModelIndex index = view->currentIndex();
   if (index.isValid()) {
     Sensor sensor = *model->get(index.row());
@@ -175,7 +182,8 @@ void MainWindow::editSensor() {
   }
 }
 
-void MainWindow::save() {
+void MainWindow::save()
+{
   model->write();
 }
 
