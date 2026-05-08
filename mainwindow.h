@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QModelIndex>
 #include <QTreeView>
+#include "ACDObject.h"
+
 #include "sensormodel.h"
 
 QT_FORWARD_DECLARE_CLASS(QComboBox)
@@ -11,7 +13,7 @@ QT_FORWARD_DECLARE_CLASS(QFile)
 QT_FORWARD_DECLARE_CLASS(QGroupBox)
 QT_FORWARD_DECLARE_CLASS(QLabel)
 QT_FORWARD_DECLARE_CLASS(QListWidget)
-QT_FORWARD_DECLARE_CLASS(QTableView)
+QT_FORWARD_DECLARE_CLASS(QTreeView)
 
 class MainWindow : public QMainWindow
 {
@@ -40,6 +42,7 @@ private:
   QGroupBox *createControlBox(const QString text);
   void createMenuBar();
   void restoreLayout();
+  ACDObject *acdObject;
 
 signals:
 };

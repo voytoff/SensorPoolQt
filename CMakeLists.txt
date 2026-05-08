@@ -31,6 +31,10 @@ qt_add_executable(SensorPull
 
 )
 
+include_directories(../ACD2File)
+add_subdirectory(../ACD2File ACD2File)
+target_link_libraries(SensorPull PRIVATE ACD2File)
+
 set_target_properties(SensorPull PROPERTIES
 #    MACOSX_BUNDLE_GUI_IDENTIFIER com.example.SensorPull
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}

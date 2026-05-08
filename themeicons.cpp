@@ -42,26 +42,3 @@ ThemeIcons::~ThemeIcons()
 {
   delete ui;
 }
-
-QLabel *ThemeIcons::createImage(QMetaEnum *metaEnum, const int i)
-{
-  const auto *key = metaEnum->key(i);
-  QIcon::ThemeIcon value = (QIcon::ThemeIcon) metaEnum->value(i);
-  if (value == QIcon::ThemeIcon::NThemeIcons)
-    return nullptr;
-  qDebug() << "Key:" << key << "Value:" << value;
-
-  QIcon icon(QIcon::fromTheme(key));
-  QLabel *iconLabel = new QLabel();
-  iconLabel->setPixmap(icon.pixmap(QSize(32, 32)));
-  return iconLabel;
-  /*
-  QLabel *textLabel = new QLabel(QString(key));
-
-  //QVBoxLayout *layout = new QVBoxLayout();
-  layout->addWidget(iconLabel);
-  layout->addWidget(textLabel);
-  layout->setContentsMargins(0, 0, 0, 0);
-
-  return layout;*/
-}

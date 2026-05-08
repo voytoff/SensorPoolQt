@@ -20,7 +20,6 @@ public:
 
 private:
   Ui::ThemeIcons *ui;
-  QLabel *createImage(QMetaEnum *metaEnum, const int i);
 };
 
 #endif // THEMEICONS_H
