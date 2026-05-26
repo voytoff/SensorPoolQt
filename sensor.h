@@ -6,6 +6,7 @@
 class Sensor {// : ISensorConverter {
 public:
   Sensor();
+  bool operator==(const Sensor &other) const { return name == other.name && oid == other.oid; }
 
   QUuid oid;
   QString name;
@@ -18,11 +19,11 @@ public:
   int quantity;
   double current;
 
-  bool valid();
+  virtual double convert(QByteArray data);
 
-  bool operator==(const Sensor &other) const { return name == other.name && oid == other.oid; }
-  Sensor fromJson(const QJsonObject &obj);
-  QJsonObject toJson(const Sensor &sensor);
+  bool valid();
+  void fromJson(const QJsonObject &obj);
+  QJsonObject toJson();
 };
 
 inline QDataStream &operator<<(QDataStream &stream, const Sensor &sensor) {

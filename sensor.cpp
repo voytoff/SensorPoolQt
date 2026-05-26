@@ -2,38 +2,40 @@
 
 Sensor::Sensor() : oid() {}
 
+double Sensor::convert(QByteArray data) {
+
+}
+
 bool Sensor::valid() {
   if (oid.isNull())
     oid = QUuid();
   return true;
 }
 
-Sensor Sensor::fromJson(const QJsonObject &obj) {
-  Sensor sensor;
-  sensor.oid = QUuid(obj.value("Oid").toString());
-  sensor.name = obj.value("Name").toString();
-  sensor.active = obj.value("Active").toBool();
-  sensor.sensorHost = obj.value("SensorHost").toString();
-  sensor.sensorPort = obj.value("SensorPort").toInt();
+void Sensor::fromJson(const QJsonObject &obj) {
+  oid = QUuid(obj.value("Oid").toString());
+  name = obj.value("Name").toString();
+  active = obj.value("Active").toBool();
+  sensorHost = obj.value("SensorHost").toString();
+  sensorPort = obj.value("SensorPort").toInt();
   //  sensor.SensorConverter = obj.value("SensorConverter").toString();
-  sensor.channelName = obj.value("ChannelName").toString();
-  sensor.description = obj.value("Description").toString();
-  sensor.unit = obj.value("Unit").toString();
-  sensor.quantity = obj.value("Quantity").toInt();
-  return sensor;
+  channelName = obj.value("ChannelName").toString();
+  description = obj.value("Description").toString();
+  unit = obj.value("Unit").toString();
+  quantity = obj.value("Quantity").toInt();
 }
 
-QJsonObject Sensor::toJson(const Sensor &sensor) {
+QJsonObject Sensor::toJson() {
   QJsonObject obj;
-  obj["Oid"] = sensor.oid.toString();
-  obj["Name"] = sensor.name;
-  obj["Active"] = sensor.active;
-  obj["SensorHost"] = sensor.sensorHost;
-  obj["SensorPort"] = sensor.sensorPort;
-  //  obj["SensorConverter"] = sensor.SensorConverter;
-  obj["ChannelName"] = sensor.channelName;
-  obj["Description"] = sensor.description;
-  obj["Unit"] = sensor.unit;
-  obj["Quantity"] = sensor.quantity;
+  obj["Oid"] = oid.toString();
+  obj["Name"] = name;
+  obj["Active"] = active;
+  obj["SensorHost"] = sensorHost;
+  obj["SensorPort"] = sensorPort;
+  //  obj["SensorConverter"] = SensorConverter;
+  obj["ChannelName"] = channelName;
+  obj["Description"] = description;
+  obj["Unit"] = unit;
+  obj["Quantity"] = quantity;
   return obj;
 }

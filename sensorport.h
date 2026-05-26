@@ -29,9 +29,10 @@ protected:
   QTimer timer;
 
 public slots:
-  void connect(const QString host, const int port);
+  bool connect(const QString host, const int port);
   void start(int step);
   void close();
+  bool isOpen();
 
 signals:
   void readyData(QByteArray &data);

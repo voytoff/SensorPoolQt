@@ -193,8 +193,8 @@ int SensorModel::read()
 
       for (const QJsonValue &value : std::as_const(jsonArray)) {
         Sensor sensor;
-        sensor.fromJson (value);
-        add(sensors);
+        sensor.fromJson(value.toObject());
+        add(sensor);
       }
     }
   }
@@ -207,9 +207,8 @@ void SensorModel::write()
   QFile file(getDbName());
   if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
     QJsonArray jsonArray;
-    for (const auto &sensor : std::as_const(sensors)) {
-      QJsonObject obj;
-      obj << sensor;
+    for (auto &sensor : sensors) {
+      QJsonObject obj = sensor.toJson();
       jsonArray.append(obj);
     }
 
@@ -241,17 +240,17 @@ Sensor SensorModel::addEntry(
   QString unit,
   int quantity)
 {
-  Sensor sensor{
-    oid,
-    name,
-    active,
-    sensorHost,
-    sensorPort,
-    sensorConverter,
-    channelName,
-    description,
-    unit,
-    quantity};
+  Sensor sensor;
+  sensor.oid = oid;
+  sensor.name = name;
+  sensor.active = active;
+  sensor.sensorHost = sensorHost;
+  sensor.sensorPort = sensorPort;
+   // sensorConverter,
+  sensor.channelName = channelName;
+  sensor.description = description;
+  sensor.unit = unit;
+  sensor.quantity = quantity;
   add(sensor);
   return sensor;
 }

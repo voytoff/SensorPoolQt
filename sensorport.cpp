@@ -5,7 +5,8 @@ SensorPort::SensorPort(QObject *parent) : QObject{parent},
   timer(this) {
   timer.setTimerType(Qt::PreciseTimer);
   QAbstractSocket::connect(&timer, &QTimer::timeout, this, [this]() {
-    emit readyData(data);
+    if (isOpen())
+      emit readyData(data);
   });
   QAbstractSocket::connect(&tcpSocket, &QTcpSocket::connected, this, [this]() {
     qDebug() << "Connected to server!";
@@ -17,11 +18,13 @@ SensorPort::SensorPort(QObject *parent) : QObject{parent},
   //QAbstractSocket::connect(&tcpSocket, &QTcpSocket::disconnected, this, &QTcpSocket::deleteLater);
 }
 
-void SensorPort::connect(const QString host, const int port) {
+bool SensorPort::connect(const QString host, const int port) {
   tcpSocket.connectToHost(host, port);
+  return isOpen();
 }
 
 void SensorPort::start(int step) {
+  if (!isOpen()) return;
   int msec = 1000 / step;
   if (!timer.isActive())
     timer.start(msec);
@@ -35,6 +38,20 @@ void SensorPort::close() {
   //tcpSocket.disconnectFromHost();
   tcpSocket.abort();
   data.clear();
+}
+
+bool SensorPort::isOpen() {
+  return tcpSocket.state() == QTcpSocket::ConnectedState;
+/*
+  switch (state) {
+    case QAbstractSocket::UnconnectedState: // Disconnected  break;
+    case QAbstractSocket::HostLookupState:  // Looking up host...  break;
+    case QAbstractSocket::ConnectingState:  // Attempting to connect...  break;
+    case QAbstractSocket::ConnectedState:   // Connection established!  break;
+    case QAbstractSocket::ClosingState:     // Socket closing...  break;
+    default: break;
+  }
+*/
 }
 
 QString SensorPort::read_string() {
