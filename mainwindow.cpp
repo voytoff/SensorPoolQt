@@ -159,15 +159,16 @@ QGroupBox *MainWindow::createControlBox(const QString text) {
 
 void MainWindow::about()
 {
-  QMessageBox::about(this,
-                     tr("About Music Archive"),
-                     tr("<p><b>Sensor Pool</b> программа записи параметров "
-                        "обработки экспериментов с датчиков регистрации.</p>"));
+  QMessageBox::about(
+    this,
+    tr("About Music Archive"),
+    tr("<p><b>Sensor Pool</b> программа записи параметров "
+      "обработки экспериментов с датчиков регистрации.</p>"));
 }
 
 void MainWindow::addSensor()
 {
-  Sensor sensor{QUuid()};
+  Sensor sensor;
   SensorProperties *dialog = new SensorProperties(sensor, this);
   int accepted = dialog->exec();
 

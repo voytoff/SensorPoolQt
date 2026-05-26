@@ -13,71 +13,7 @@
 #include <QUuid>
 #include <QVariant>
 
-struct Sensor
-{
-  //Sensor() {Oid = QUuid();}
-  QUuid Oid;
-  QString Name;
-  bool Active;
-  QString SensorHost;
-  int SensorPort;
-  QString SensorConverter;
-  QString ChannelName;
-  QString Description;
-  QString Unit;
-  int Quantity;
-
-  bool valid()
-  {
-    if (Oid.isNull())
-      Oid = QUuid();
-    return true;
-  }
-
-  bool operator==(const Sensor &other) const { return Name == other.Name && Oid == other.Oid; }
-};
-
-inline QDataStream &operator<<(QDataStream &stream, const Sensor &sensor)
-{
-  return stream << sensor.Oid << sensor.Name << sensor.Active << sensor.SensorHost
-                << sensor.SensorPort << sensor.SensorConverter << sensor.ChannelName
-                << sensor.Description << sensor.Unit << sensor.Quantity;
-}
-
-inline QDataStream &operator>>(QDataStream &stream, Sensor &sensor)
-{
-  return stream >> sensor.Oid >> sensor.Name >> sensor.Active >> sensor.SensorHost
-         >> sensor.SensorPort >> sensor.SensorConverter >> sensor.ChannelName
-         >> sensor.Description >> sensor.Unit >> sensor.Quantity;
-}
-inline Sensor operator>>(const QJsonObject &obj, Sensor &sensor)
-{
-  sensor.Oid = QUuid(obj.value("Oid").toString());
-  sensor.Name = obj.value("Name").toString();
-  sensor.Active = obj.value("Active").toBool();
-  sensor.SensorHost = obj.value("SensorHost").toString();
-  sensor.SensorPort = obj.value("SensorPort").toInt();
-  sensor.SensorConverter = obj.value("SensorConverter").toString();
-  sensor.ChannelName = obj.value("ChannelName").toString();
-  sensor.Description = obj.value("Description").toString();
-  sensor.Unit = obj.value("Unit").toString();
-  sensor.Quantity = obj.value("Quantity").toInt();
-  return sensor;
-}
-inline QJsonObject operator<<(QJsonObject &obj, const Sensor &sensor)
-{
-  obj["Oid"] = sensor.Oid.toString();
-  obj["Name"] = sensor.Name;
-  obj["Active"] = sensor.Active;
-  obj["SensorHost"] = sensor.SensorHost;
-  obj["SensorPort"] = sensor.SensorPort;
-  obj["SensorConverter"] = sensor.SensorConverter;
-  obj["ChannelName"] = sensor.ChannelName;
-  obj["Description"] = sensor.Description;
-  obj["Unit"] = sensor.Unit;
-  obj["Quantity"] = sensor.Quantity;
-  return obj;
-}
+#include "sensor.h"
 
 class SensorModel : public QAbstractTableModel
 {

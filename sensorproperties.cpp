@@ -24,15 +24,15 @@ SensorProperties::SensorProperties(Sensor &sensor, QWidget *parent)
   ui->quantity->addItem("10", 10);
   ui->quantity->addItem("100", 100);
 
-  ui->name->setText(sensor.Name);
-  ui->active->setChecked(sensor.Active);
-  ui->sensorHost->setText(sensor.SensorHost);
-  ui->sensorPort->setValue(sensor.SensorPort);
-  ui->sensorConverter->setCurrentText(sensor.SensorConverter);
-  ui->channelName->setText(sensor.ChannelName);
-  ui->description->setText(sensor.Description);
-  ui->unit->setCurrentText(sensor.Unit);
-  ui->quantity->setCurrentText(QString::number(sensor.Quantity));
+  ui->name->setText(sensor.name);
+  ui->active->setChecked(sensor.active);
+  ui->sensorHost->setText(sensor.sensorHost);
+  ui->sensorPort->setValue(sensor.sensorPort);
+  //ui->sensorConverter->setCurrentText(sensor.SensorConverter);
+  ui->channelName->setText(sensor.channelName);
+  ui->description->setText(sensor.description);
+  ui->unit->setCurrentText(sensor.unit);
+  ui->quantity->setCurrentText(QString::number(sensor.quantity));
 
   connect(this, &QDialog::finished, this, [this](int result) { accept(result); });
 
@@ -50,14 +50,14 @@ void SensorProperties::accept(const int result)
 {
   qDebug() << "Dialog closed with result:" << result;
   if (result == QDialog::Accepted) {
-    sensor.Name = ui->name->text();
-    sensor.Active = ui->active->isChecked();
-    sensor.SensorHost = ui->sensorHost->text();
-    sensor.SensorPort = ui->sensorPort->value();
-    sensor.SensorConverter = ui->sensorConverter->currentText();
-    sensor.ChannelName = ui->channelName->text();
-    sensor.Description = ui->description->text();
-    sensor.Unit = ui->unit->currentText();
-    sensor.Quantity = ui->quantity->currentText().toInt();
+    sensor.name = ui->name->text();
+    sensor.active = ui->active->isChecked();
+    sensor.sensorHost = ui->sensorHost->text();
+    sensor.sensorPort = ui->sensorPort->value();
+    //sensor.SensorConverter = ui->sensorConverter->currentText();
+    sensor.channelName = ui->channelName->text();
+    sensor.description = ui->description->text();
+    sensor.unit = ui->unit->currentText();
+    sensor.quantity = ui->quantity->currentText().toInt();
   }
 }

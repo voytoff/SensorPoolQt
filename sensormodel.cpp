@@ -38,27 +38,27 @@ QVariant SensorModel::data(const QModelIndex &index, int role) const
 
     switch (index.column()) {
     case -1:
-      return QString("%1:%2").arg(sensor.SensorHost).arg(sensor.SensorPort);
+      return QString("%1:%2").arg(sensor.sensorHost).arg(sensor.sensorPort);
     case 0:
-      return sensor.Oid;
+      return sensor.oid;
     case 1:
-      return sensor.Name;
+      return sensor.name;
     case 2:
-      return sensor.Active;
+      return sensor.active;
     case 3:
-      return sensor.SensorHost;
+      return sensor.sensorHost;
     case 4:
-      return sensor.SensorPort;
-    case 5:
-      return sensor.SensorConverter;
+      return sensor.sensorPort;
+    //case 5:
+    //  return sensor.SensorConverter;
     case 6:
-      return sensor.ChannelName;
+      return sensor.channelName;
     case 7:
-      return sensor.Description;
+      return sensor.description;
     case 8:
-      return sensor.Unit;
+      return sensor.unit;
     case 9:
-      return sensor.Quantity;
+      return sensor.quantity;
     default:
       break;
     }
@@ -156,8 +156,7 @@ Sensor *SensorModel::get(int row)
   return &sensor;
 }
 
-void SensorModel::add(Sensor sensor)
-{
+void SensorModel::add(Sensor sensor) {
   if (sensor.valid()) {
     sensors.append(sensor);
     layoutChanged();
@@ -194,8 +193,8 @@ int SensorModel::read()
 
       for (const QJsonValue &value : std::as_const(jsonArray)) {
         Sensor sensor;
-        value.toObject() >> sensor;
-        add(sensor);
+        sensor.fromJson (value);
+        add(sensors);
       }
     }
   }

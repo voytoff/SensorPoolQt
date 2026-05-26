@@ -28,6 +28,8 @@ qt_add_executable(SensorPull
     sensormodel.h sensormodel.cpp
     themeicons.h themeicons.cpp themeicons.ui
     sensorport.h sensorport.cpp
+    isensorconverter.h
+    sensor.h sensor.cpp
 )
 
 include_directories(../ACD2FileQt/lib)
