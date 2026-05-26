@@ -4,9 +4,12 @@
 #include <QMainWindow>
 #include <QModelIndex>
 #include <QTreeView>
-#include "ACDObject.h"
+#include <QWebSocket>
+#include <QTcpSocket>
 
+#include "ACDObject.h"
 #include "sensormodel.h"
+#include "sensorport.h"
 
 QT_FORWARD_DECLARE_CLASS(QComboBox)
 QT_FORWARD_DECLARE_CLASS(QFile)
@@ -15,8 +18,7 @@ QT_FORWARD_DECLARE_CLASS(QLabel)
 QT_FORWARD_DECLARE_CLASS(QListWidget)
 QT_FORWARD_DECLARE_CLASS(QTreeView)
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
   Q_OBJECT
 public:
   explicit MainWindow(const QString &artistTable, QWidget *parent = nullptr);
@@ -33,6 +35,8 @@ private slots:
   void editSensor();
   void save();
   void showIcons();
+  void start();
+  void stop();
 
 private:
   //QTableView *view;
@@ -43,6 +47,8 @@ private:
   void createMenuBar();
   void restoreLayout();
   ACDObject *acdObject;
+
+  SensorPort *sensor;
 
 signals:
 };

@@ -12,6 +12,7 @@ find_package(Qt6 6.5 REQUIRED COMPONENTS
     Svg
     Gui
     Concurrent
+    WebSockets
 )
 
 qt_standard_project_setup()
@@ -26,6 +27,7 @@ qt_add_executable(SensorPull
     sensorproperties.h sensorproperties.cpp sensorproperties.ui
     sensormodel.h sensormodel.cpp
     themeicons.h themeicons.cpp themeicons.ui
+    sensorport.h sensorport.cpp
 )
 
 include_directories(../ACD2FileQt/lib)
@@ -44,6 +46,7 @@ target_link_libraries(SensorPull PRIVATE
     Qt6::Widgets
     Qt6::Quick
     Qt6::Gui
+    Qt6::WebSockets
 )
 
 include(GNUInstallDirs)
