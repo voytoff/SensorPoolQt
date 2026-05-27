@@ -9,13 +9,16 @@ SensorPort::SensorPort(QObject *parent) : QObject{parent},
       emit readyData(data);
   });
   QAbstractSocket::connect(&tcpSocket, &QTcpSocket::connected, this, [this]() {
-    qDebug() << "Connected to server!";
+    qDebug() << "Connected to server:)";
   });
   QAbstractSocket::connect(&tcpSocket, &QTcpSocket::readyRead, this, [this]() {
     data = tcpSocket.readAll();
     if (debug) qDebug() << "Data received:" << data;
   });
-  //QAbstractSocket::connect(&tcpSocket, &QTcpSocket::disconnected, this, &QTcpSocket::deleteLater);
+  QAbstractSocket::connect(&tcpSocket, &QTcpSocket::disconnected, this, [this]() {
+    qDebug() << "Disconnected from server:(";
+    //deleteLater();
+  });
 }
 
 bool SensorPort::connect(const QString host, const int port) {
@@ -24,6 +27,7 @@ bool SensorPort::connect(const QString host, const int port) {
 }
 
 void SensorPort::start(int step) {
+  qDebug() << tcpSocket.state();
   if (!isOpen()) return;
   int msec = 1000 / step;
   if (!timer.isActive())
@@ -41,7 +45,7 @@ void SensorPort::close() {
 }
 
 bool SensorPort::isOpen() {
-  return tcpSocket.state() == QTcpSocket::ConnectedState;
+  return connectingStates.contains(tcpSocket.state());
 /*
   switch (state) {
     case QAbstractSocket::UnconnectedState: // Disconnected  break;

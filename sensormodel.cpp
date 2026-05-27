@@ -163,8 +163,7 @@ void SensorModel::add(Sensor sensor) {
   }
 }
 
-void SensorModel::replace(int row, const Sensor sensor)
-{
+void SensorModel::replace(int row, const Sensor sensor) {
   sensors.replace(row, sensor);
 }
 

@@ -30,11 +30,17 @@ qt_add_executable(SensorPull
     sensorport.h sensorport.cpp
     isensorconverter.h
     sensor.h sensor.cpp
+    settings.cpp settings.h
+    settingsdlg.h settingsdlg.cpp settingsdlg.ui
 )
 
-include_directories(../ACD2FileQt/lib)
-add_subdirectory(../ACD2FileQt ACD2File )
-target_link_libraries(SensorPull PRIVATE ACD2File)
+set(ACDFILEDIR "../ACD2FileQt")
+include_directories(${ACDFILEDIR}/lib)
+add_subdirectory(${ACDFILEDIR} ACD2File)
+
+set(SCHEMEHELPEREDIR "../SchemeHelperQt")
+include_directories(${SCHEMEHELPEREDIR})
+add_subdirectory(${SCHEMEHELPEREDIR} SchemeHelper)
 
 set_target_properties(SensorPull PROPERTIES
 #    MACOSX_BUNDLE_GUI_IDENTIFIER com.example.SensorPull
@@ -49,6 +55,8 @@ target_link_libraries(SensorPull PRIVATE
     Qt6::Quick
     Qt6::Gui
     Qt6::WebSockets
+    ACD2File
+    SchemeHelper
 )
 
 include(GNUInstallDirs)

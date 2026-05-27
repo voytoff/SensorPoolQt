@@ -27,6 +27,7 @@ protected:
   QTcpSocket tcpSocket;
   Data data;
   QTimer timer;
+  QVariantList connectingStates {QAbstractSocket::ConnectingState, QTcpSocket::ConnectedState};
 
 public slots:
   bool connect(const QString host, const int port);
