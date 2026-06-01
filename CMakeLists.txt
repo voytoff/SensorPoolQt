@@ -26,7 +26,7 @@ qt_add_executable(SensorPull
     ${PROJECT_RESOURCES}
     sensorproperties.h sensorproperties.cpp sensorproperties.ui
     sensormodel.h sensormodel.cpp
-    themeicons.h themeicons.cpp themeicons.ui
+
     sensorport.h sensorport.cpp
     isensorconverter.h
     sensor.h sensor.cpp
@@ -40,9 +40,11 @@ if (NOT TARGET GlobalLib)
     add_subdirectory(${GLOBALLIBDIR} GlobalLib)
 endif()
 
-set(ACDFILEDIR "../ACD2FileQt")
-include_directories(${ACDFILEDIR}/lib)
-add_subdirectory(${ACDFILEDIR} ACD2File)
+set(MMPFILEDIR "../MMPFileQt")
+include_directories(${MMPFILEDIR}/lib)
+if (NOT TARGET MMPFile)
+    add_subdirectory(${MMPFILEDIR} MMPFile)
+endif()
 
 set(SCHEMEHELPEREDIR "../SchemeHelperQt")
 include_directories(${SCHEMEHELPEREDIR})
@@ -61,7 +63,7 @@ target_link_libraries(SensorPull PRIVATE
     Qt6::Quick
     Qt6::Gui
     Qt6::WebSockets
-    ACD2File
+    MMPFile
     SchemeHelper
 )
 

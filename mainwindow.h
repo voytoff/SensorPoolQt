@@ -8,6 +8,7 @@
 #include <QTcpSocket>
 #include <QProgressBar>
 #include <QGroupBox>
+#include <QSplitter>
 
 #include "schemehelper.h"
 #include "sensormodel.h"
@@ -38,7 +39,6 @@ private slots:
   void about();
   void editSensor();
   void save();
-  void showIcons();
   void start();
   void stop();
 
@@ -52,7 +52,6 @@ private:
   QAction *quitAction;
   QAction *aboutAction;
   QAction *saveAction;
-  QAction *iconsAction;
   QAction *startAction;
   QAction *stopAction;
   QAction *lightAction;
@@ -61,15 +60,15 @@ private:
 
   QProgressBar *progressBar;
 
-  //ACDObject *acdObject;
   SensorPort *sensor;
 
+  QSplitter *splitter;
   QTreeView *view;
   SensorModel *model;
 
   SchemeHelper *schemeHelper;
 
-  QGroupBox *createSensorBox(const QString text);
+  QWidget *createSensorBox(const QString text);
   QGroupBox *createControlBox(const QString text);
   void createControlBar();
   void restoreLayout();

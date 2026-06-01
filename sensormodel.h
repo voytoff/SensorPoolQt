@@ -33,12 +33,12 @@ public:
   QModelIndex last() const;
   QModelIndex first() const;
   int count() const;
-  void add(Sensor sensor);
+  void add(Sensor *sensor);
   Sensor *get(int row);
-  void replace(int row, const Sensor sensor);
+  void replace(int row, const Sensor &sensor);
 
 private:
-  Sensor addEntry(
+  Sensor *addEntry(
     QUuid oid,
     QString name,
     bool active,

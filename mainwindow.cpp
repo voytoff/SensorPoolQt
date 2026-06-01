@@ -25,7 +25,6 @@
 #include "mainwindow.h"
 #include "sensorproperties.h"
 #include "settingsdlg.h"
-#include "themeicons.h"
 
 MainWindow::MainWindow(QWidget *parent)
   : QMainWindow{parent},
@@ -49,14 +48,13 @@ MainWindow::MainWindow(QWidget *parent)
 
   auto *sensorList = createSensorBox("Датчики");
   auto controlBox = createControlBox("Управление");
-  //auto splitter = new QSplitter(this);
-  //splitter->addWidget(sensorList);
-  //splitter->addWidget(controlBox);
+  splitter = new QSplitter(this);
+  splitter->addWidget(sensorList);
+  splitter->addWidget(controlBox);
 
   QGridLayout *layout = new QGridLayout;
-  layout->addWidget(sensorList, 0, 0);
-  //layout->addWidget(splitter, 0, 0);
-  layout->addWidget(controlBox, 0, 1);
+  layout->addWidget(splitter, 0, 0);
+  layout->setContentsMargins(2, 1, 2, 0);
 
   QWidget *widget = new QWidget;
   widget->setLayout(layout);
@@ -77,7 +75,6 @@ void MainWindow::createActions() {
   quitAction = schemeHelper->create(tr("Выход"), ":/images/tb/exit.svg", QKeySequence::Quit);
   aboutAction = schemeHelper->create(tr("&About"));
   saveAction = schemeHelper->create(tr("Сохранить"), nullptr, QKeySequence::Save);
-  iconsAction = schemeHelper->create(tr("Просмотр иконок..."));
   startAction = schemeHelper->create(tr("Запуск опроса"), ":/images/tb/start.svg", QKeySequence(Qt::CTRL | Qt::Key_B));
   stopAction = schemeHelper->create(tr("Останов опроса"), ":/images/tb/stop.svg", QKeySequence(Qt::CTRL | Qt::Key_E));
   lightAction = schemeHelper->createLightAction(tr("Дневной режим"), ":/images/tb/light.svg");
@@ -89,7 +86,6 @@ void MainWindow::createActions() {
   connect(aboutAction, &QAction::triggered, this, &MainWindow::about);
   connect(saveAction, &QAction::triggered, this, &MainWindow::save);
   connect(quitAction, &QAction::triggered, this, [this]() { close(); });
-  connect(iconsAction, &QAction::triggered, this, &MainWindow::showIcons);
   connect(settingsAction, &QAction::triggered, this, &MainWindow::doSettings);
   connect(startAction, &QAction::triggered, this, &MainWindow::start);
   connect(stopAction, &QAction::triggered, this, &MainWindow::stop);
@@ -118,7 +114,6 @@ void MainWindow::createControlBar() {
 
   QMenu *helpMenu = menuBar()->addMenu(tr("&?"));
   helpMenu->addAction(aboutAction);
-  helpMenu->addAction(iconsAction);
 
   //menuBar()->setNativeMenuBar(false);
 
@@ -147,9 +142,7 @@ void MainWindow::restoreLayout() {
   //splitter->restoreState(settings->splitter());
 }
 
-QGroupBox *MainWindow::createSensorBox(const QString text) {
-  QGroupBox *box = new QGroupBox(text);
-
+QWidget *MainWindow::createSensorBox(const QString text) {
   view = new QTreeView;
   view->setModel(model);
   adjustHeader();
@@ -162,14 +155,9 @@ QGroupBox *MainWindow::createSensorBox(const QString text) {
   QLocale locale = view->locale();
   locale.setNumberOptions(QLocale::OmitGroupSeparator);
   view->setLocale(locale);
-
   view->setItemDelegate(new CustomDelegate());
 
-  QBoxLayout *layout = new QBoxLayout(QBoxLayout::Direction::TopToBottom);
-  layout->addWidget(view);
-  box->setLayout(layout);
-
-  return box;
+  return view;
 }
 
 QGroupBox *MainWindow::createControlBox(const QString text) {
@@ -195,11 +183,11 @@ void MainWindow::about() {
 }
 
 void MainWindow::addSensor() {
-  Sensor sensor;
+  Sensor *sensor = new Sensor();
   SensorProperties *dialog = new SensorProperties(sensor, this);
   int accepted = dialog->exec();
 
-  if (accepted == QDialog::Accepted && sensor.valid()) {
+  if (accepted == QDialog::Accepted && sensor->valid()) {
     model->add(sensor);
     view->setCurrentIndex(model->last());
     view->scrollToBottom();
@@ -219,22 +207,17 @@ void MainWindow::delSensor() {
 void MainWindow::editSensor() {
   QModelIndex index = view->currentIndex();
   if (index.isValid()) {
-    Sensor sensor = *model->get(index.row());
+    Sensor *sensor = model->get(index.row());
     SensorProperties *dialog = new SensorProperties(sensor, this);
     int accepted = dialog->exec();
-    if (accepted == QDialog::Accepted && sensor.valid()) {
-      model->replace(index.row(), sensor);
+    if (accepted == QDialog::Accepted && sensor->valid()) {
+      model->replace(index.row(), *sensor);
     }
   }
 }
 
 void MainWindow::save() {
   model->write();
-}
-
-void MainWindow::showIcons() {
-  ThemeIcons *d = new ThemeIcons(this);
-  d->exec();
 }
 
 void MainWindow::start() {

@@ -25,8 +25,7 @@ int SensorModel::columnCount(const QModelIndex &parent) const
   return parent.isValid() ? 0 : 10;
 }
 
-QVariant SensorModel::data(const QModelIndex &index, int role) const
-{
+QVariant SensorModel::data(const QModelIndex &index, int role) const {
   if (!index.isValid())
     return QVariant();
 
@@ -156,14 +155,14 @@ Sensor *SensorModel::get(int row)
   return &sensor;
 }
 
-void SensorModel::add(Sensor sensor) {
-  if (sensor.valid()) {
-    sensors.append(sensor);
+void SensorModel::add(Sensor* sensor) {
+  if (sensor->valid()) {
+    sensors.append(*sensor);
     layoutChanged();
   }
 }
 
-void SensorModel::replace(int row, const Sensor sensor) {
+void SensorModel::replace(int row, const Sensor &sensor) {
   sensors.replace(row, sensor);
 }
 
@@ -193,7 +192,7 @@ int SensorModel::read()
       for (const QJsonValue &value : std::as_const(jsonArray)) {
         Sensor sensor;
         sensor.fromJson(value.toObject());
-        add(sensor);
+        add(&sensor);
       }
     }
   }
@@ -227,7 +226,7 @@ QString SensorModel::getDbName()
   return result + "/db.json";
 }
 
-Sensor SensorModel::addEntry(
+Sensor* SensorModel::addEntry(
   QUuid oid,
   QString name,
   bool active,
@@ -239,17 +238,17 @@ Sensor SensorModel::addEntry(
   QString unit,
   int quantity)
 {
-  Sensor sensor;
-  sensor.oid = oid;
-  sensor.name = name;
-  sensor.active = active;
-  sensor.sensorHost = sensorHost;
-  sensor.sensorPort = sensorPort;
+  Sensor *sensor = new Sensor();
+  sensor->oid = oid;
+  sensor->name = name;
+  sensor->active = active;
+  sensor->sensorHost = sensorHost;
+  sensor->sensorPort = sensorPort;
    // sensorConverter,
-  sensor.channelName = channelName;
-  sensor.description = description;
-  sensor.unit = unit;
-  sensor.quantity = quantity;
+  sensor->channelName = channelName;
+  sensor->description = description;
+  sensor->unit = unit;
+  sensor->quantity = quantity;
   add(sensor);
   return sensor;
 }

@@ -3,10 +3,12 @@
 
 #include <QUuid>
 #include <QJsonObject>
-class Sensor {// : ISensorConverter {
+class Sensor : public QObject {
+  Q_OBJECT
 public:
-  Sensor();
+  explicit Sensor(QObject *parent = nullptr);
   bool operator==(const Sensor &other) const { return name == other.name && oid == other.oid; }
+  const QVariant at(const int index);
 
   QUuid oid;
   QString name;
@@ -17,7 +19,7 @@ public:
   QString description;
   QString unit;
   int quantity;
-  double current;
+  double value;
 
   virtual double convert(QByteArray data);
 
