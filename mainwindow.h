@@ -62,7 +62,7 @@ private:
 
   QProgressBar *progressBar;
 
-  ACDObject *acdObject;
+  //ACDObject *acdObject;
   SensorPort *sensor;
 
   QTreeView *view;

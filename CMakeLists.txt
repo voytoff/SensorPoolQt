@@ -34,6 +34,12 @@ qt_add_executable(SensorPull
     settingsdlg.h settingsdlg.cpp settingsdlg.ui
 )
 
+set(GLOBALLIBDIR "../GlobalLibQt")
+include_directories(${GLOBALLIBDIR})
+if (NOT TARGET GlobalLib)
+    add_subdirectory(${GLOBALLIBDIR} GlobalLib)
+endif()
+
 set(ACDFILEDIR "../ACD2FileQt")
 include_directories(${ACDFILEDIR}/lib)
 add_subdirectory(${ACDFILEDIR} ACD2File)

@@ -3,7 +3,7 @@
 Sensor::Sensor() : oid() {}
 
 double Sensor::convert(QByteArray data) {
-
+  return 0;
 }
 
 bool Sensor::valid() {
