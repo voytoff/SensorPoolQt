@@ -15,27 +15,28 @@
 
 #include "sensor.h"
 
-class SensorModel : public QAbstractTableModel
-{
+class SensorModel : public QAbstractTableModel {
   Q_OBJECT
 public:
   SensorModel(QObject *parent = nullptr);
-  SensorModel(const QList<Sensor> &sensors, QObject *parent = nullptr);
-  int read();
-  void write();
+  //SensorModel(const QList<Sensor*> &sensors, QObject *parent = nullptr);
   QString getDbName();
   int rowCount(const QModelIndex &parent) const override;
   int columnCount(const QModelIndex &parent) const override;
   QVariant data(const QModelIndex &index, int role) const override;
   QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
   bool visible(int col) const;
-  QModelIndex ind(int row) const;
-  QModelIndex last() const;
-  QModelIndex first() const;
-  int count() const;
+  inline QModelIndex last() const {
+    return index(0, 0, QModelIndex());
+  }
+  inline int count() const {
+    return sensors->size();
+  }
   void add(Sensor *sensor);
   Sensor *get(int row);
-  void replace(int row, const Sensor &sensor);
+  void replace(int row, Sensor &sensor);
+  int read();
+  void write();
 
 private:
   Sensor *addEntry(
@@ -50,16 +51,12 @@ private:
     QString unit,
     int quantity);
 
-  QList<Sensor> sensors;
+  QList<Sensor*> *sensors;
 };
 
-class CustomDelegate : public QStyledItemDelegate
-{
+class CustomDelegate : public QStyledItemDelegate {
 public:
-  void paint(QPainter *painter,
-             const QStyleOptionViewItem &option,
-             const QModelIndex &index) const override
-  {
+  void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override {
     if (index.column() == 1 /*Name*/) {
       QModelIndex active = index.sibling(index.row(), 2 /*Active*/);
       QVariant bold = active.data(Qt::DisplayRole);

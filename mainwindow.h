@@ -60,16 +60,16 @@ private:
 
   QProgressBar *progressBar;
 
-  SensorPort *sensor;
+  SensorPort *sensorPort;
 
   QSplitter *splitter;
-  QTreeView *view;
+  QTreeView *treeView;
+  QTabWidget *tabControl;
   SensorModel *model;
 
   SchemeHelper *schemeHelper;
 
-  QWidget *createSensorBox(const QString text);
-  QGroupBox *createControlBox(const QString text);
+  void createControlBox();
   void createControlBar();
   void restoreLayout();
   void saveLayout();

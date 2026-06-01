@@ -27,17 +27,20 @@
 #include "settingsdlg.h"
 
 MainWindow::MainWindow(QWidget *parent)
-  : QMainWindow{parent},
-  model(new SensorModel(this)),
-  sensor(new SensorPort(this)),
-  schemeHelper(new SchemeHelper(this, ":/images/rocket.svg")),
-  settings(new Settings()),
-  progressBar(new QProgressBar()) {
+  : QMainWindow{parent}
+  , model(new SensorModel(this))
+  , treeView(new QTreeView(this))
+  , tabControl(new QTabWidget(this))
+  , splitter(new QSplitter(this))
+  , sensorPort(new SensorPort(this))
+  , schemeHelper(new SchemeHelper(this, ":/images/rocket.svg"))
+  , settings(new Settings())
+  , progressBar(new QProgressBar()) {
 
   QIcon::setThemeName("Material Symbols Outlined");
 
-  connect(sensor, &SensorPort::readyData, this, [this](QByteArray data) {
-    qDebug() << QTime::currentTime().toString("hh:mm:ss.zzz") << sensor->get<QString>();
+  connect(sensorPort, &SensorPort::readyData, this, [this](QByteArray data) {
+    qDebug() << QTime::currentTime().toString("hh:mm:ss.zzz") << sensorPort->get<QString>();
   });
 
   model->read();
@@ -46,11 +49,7 @@ MainWindow::MainWindow(QWidget *parent)
   createControlBar();
   statusBar()->setSizeGripEnabled(true);
 
-  auto *sensorList = createSensorBox("Датчики");
-  auto controlBox = createControlBox("Управление");
-  splitter = new QSplitter(this);
-  splitter->addWidget(sensorList);
-  splitter->addWidget(controlBox);
+  createControlBox();
 
   QGridLayout *layout = new QGridLayout;
   layout->addWidget(splitter, 0, 0);
@@ -74,7 +73,7 @@ void MainWindow::createActions() {
   delAction = schemeHelper->create(tr("Удалить текущий..."), ":/images/tb/del.svg", QKeySequence(Qt::CTRL | Qt::Key_D));
   quitAction = schemeHelper->create(tr("Выход"), ":/images/tb/exit.svg", QKeySequence::Quit);
   aboutAction = schemeHelper->create(tr("&About"));
-  saveAction = schemeHelper->create(tr("Сохранить"), nullptr, QKeySequence::Save);
+  saveAction = schemeHelper->create(tr("Сохранить"), ":/images/tb/save.svg", QKeySequence::Save);
   startAction = schemeHelper->create(tr("Запуск опроса"), ":/images/tb/start.svg", QKeySequence(Qt::CTRL | Qt::Key_B));
   stopAction = schemeHelper->create(tr("Останов опроса"), ":/images/tb/stop.svg", QKeySequence(Qt::CTRL | Qt::Key_E));
   lightAction = schemeHelper->createLightAction(tr("Дневной режим"), ":/images/tb/light.svg");
@@ -136,42 +135,22 @@ void MainWindow::createControlBar() {
   progressBar->hide();
 }
 
-void MainWindow::restoreLayout() {
-  restoreGeometry(settings->geometry());
-  restoreState(settings->windowState());
-  //splitter->restoreState(settings->splitter());
-}
-
-QWidget *MainWindow::createSensorBox(const QString text) {
-  view = new QTreeView;
-  view->setModel(model);
+void MainWindow::createControlBox() {
+  treeView->setModel(model);
   adjustHeader();
 
-  view->setRootIsDecorated(false);
-  view->setAlternatingRowColors(true);
-  view->setSortingEnabled(true);
-  connect(view, &QTreeView::doubleClicked, this, &MainWindow::editSensor);
+  treeView->setRootIsDecorated(false);
+  treeView->setAlternatingRowColors(true);
+  treeView->setSortingEnabled(true);
+  connect(treeView, &QTreeView::doubleClicked, this, &MainWindow::editSensor);
 
-  QLocale locale = view->locale();
+  QLocale locale = treeView->locale();
   locale.setNumberOptions(QLocale::OmitGroupSeparator);
-  view->setLocale(locale);
-  view->setItemDelegate(new CustomDelegate());
+  treeView->setLocale(locale);
+  treeView->setItemDelegate(new CustomDelegate());
 
-  return view;
-}
-
-QGroupBox *MainWindow::createControlBox(const QString text) {
-  QGroupBox *box = new QGroupBox(text);
-  QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Orientation::Vertical, box);
-
-  connect(buttonBox, &QDialogButtonBox::accepted, this, &MainWindow::start);
-  connect(buttonBox, &QDialogButtonBox::rejected, this, &MainWindow::stop);
-
-  QBoxLayout *layout = new QBoxLayout(QBoxLayout::Direction::TopToBottom);
-  layout->addWidget(buttonBox);
-  box->setLayout(layout);
-
-  return box;
+  splitter->addWidget(treeView);
+  splitter->addWidget(tabControl);
 }
 
 void MainWindow::about() {
@@ -189,13 +168,13 @@ void MainWindow::addSensor() {
 
   if (accepted == QDialog::Accepted && sensor->valid()) {
     model->add(sensor);
-    view->setCurrentIndex(model->last());
-    view->scrollToBottom();
+    treeView->setCurrentIndex(model->last());
+    treeView->scrollToBottom();
   }
 }
 
 void MainWindow::delSensor() {
-  QModelIndex index = view->currentIndex();
+  QModelIndex index = treeView->currentIndex();
   if (index.isValid()) {
     Sensor *sensor = model->get(index.row());
     auto response = QMessageBox::question(this, AppName, QString("Удалить текущий сенсор '%1' из списка?").arg(sensor->name));
@@ -205,7 +184,7 @@ void MainWindow::delSensor() {
 }
 
 void MainWindow::editSensor() {
-  QModelIndex index = view->currentIndex();
+  QModelIndex index = treeView->currentIndex();
   if (index.isValid()) {
     Sensor *sensor = model->get(index.row());
     SensorProperties *dialog = new SensorProperties(sensor, this);
@@ -221,27 +200,37 @@ void MainWindow::save() {
 }
 
 void MainWindow::start() {
-  sensor->connect("192.168.10.230", 25);
-  sensor->start(10);
+  QModelIndex index = treeView->currentIndex();
+  if (index.isValid()) {
+    Sensor *sensor = model->get(index.row());
+    if (sensorPort->connect(sensor))
+      sensorPort->start(10);
+  }
 }
 
 void MainWindow::stop() {
-  sensor->close();
+  sensorPort->close();
 }
 
 void MainWindow::adjustHeader() {
   for (int n = 0; n < model->columnCount(QModelIndex()); n++)
     if (!model->visible(n))
-      view->hideColumn(n);
-  view->resizeColumnToContents(0);
-  view->resizeColumnToContents(1);
-  view->resizeColumnToContents(3);
+      treeView->hideColumn(n);
+  treeView->resizeColumnToContents(0);
+  treeView->resizeColumnToContents(1);
+  treeView->resizeColumnToContents(3);
 }
 
 void MainWindow::saveLayout() {
   settings->geometry(saveGeometry());
   settings->windowState(saveState());
-  //settings->splitter(splitter->saveState());
+  settings->splitter(splitter->saveState());
+}
+
+void MainWindow::restoreLayout() {
+  restoreGeometry(settings->geometry());
+  restoreState(settings->windowState());
+  splitter->restoreState(settings->splitter());
 }
 
 void MainWindow::doSettings() {

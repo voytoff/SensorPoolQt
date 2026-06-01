@@ -21,8 +21,9 @@ SensorPort::SensorPort(QObject *parent) : QObject{parent},
   });
 }
 
-bool SensorPort::connect(const QString host, const int port) {
-  tcpSocket.connectToHost(host, port);
+bool SensorPort::connect(Sensor *sensor) {
+  this->sensor = sensor;
+  tcpSocket.connectToHost(sensor->sensorHost, sensor->sensorPort);
   return isOpen();
 }
 

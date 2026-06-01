@@ -9,166 +9,94 @@
 
 SensorModel::SensorModel(QObject *parent)
   : QAbstractTableModel(parent)
-{}
-SensorModel::SensorModel(const QList<Sensor> &sensors, QObject *parent)
-  : QAbstractTableModel(parent)
-  , sensors(sensors)
+  , sensors(new QList<Sensor*>())
 {}
 
-int SensorModel::rowCount(const QModelIndex &parent) const
-{
-  return parent.isValid() ? 0 : sensors.size();
+int SensorModel::rowCount(const QModelIndex &parent) const {
+  return parent.isValid() ? 0 : sensors->size();
 }
 
-int SensorModel::columnCount(const QModelIndex &parent) const
-{
-  return parent.isValid() ? 0 : 10;
+int SensorModel::columnCount(const QModelIndex &parent) const {
+  return parent.isValid() ? 0 : 11;
 }
 
 QVariant SensorModel::data(const QModelIndex &index, int role) const {
-  if (!index.isValid())
-    return QVariant();
-
-  if (index.row() >= sensors.size() || index.row() < 0)
-    return QVariant();
+  if (!index.isValid()) return QVariant();
+  if (index.row() >= sensors->size() || index.row() < 0) return QVariant();
 
   if (role == Qt::DisplayRole) {
-    const auto &sensor = sensors.at(index.row());
+    Sensor *sensor = sensors->at(index.row());
 
     switch (index.column()) {
-    case -1:
-      return QString("%1:%2").arg(sensor.sensorHost).arg(sensor.sensorPort);
-    case 0:
-      return sensor.oid;
-    case 1:
-      return sensor.name;
-    case 2:
-      return sensor.active;
-    case 3:
-      return sensor.sensorHost;
-    case 4:
-      return sensor.sensorPort;
-    //case 5:
-    //  return sensor.SensorConverter;
-    case 6:
-      return sensor.channelName;
-    case 7:
-      return sensor.description;
-    case 8:
-      return sensor.unit;
-    case 9:
-      return sensor.quantity;
-    default:
-      break;
+    case -1: return QString("%1:%2").arg(sensor->sensorHost).arg(sensor->sensorPort);
+    case 0: return sensor->oid;
+    case 1: return sensor->active;
+    case 2: return sensor->name;
+    case 3: return sensor->sensorHost;
+    case 4: return sensor->sensorPort;
+    //case 5: return sensor.SensorConverter;
+    case 6: return sensor->channelName;
+    case 7: return sensor->description;
+    case 8: return sensor->unit;
+    case 9: return sensor->quantity;
+    case 10: return sensor->value;
+    default: break;
     }
   }
   return QVariant();
 }
-QVariant SensorModel::headerData(int section, Qt::Orientation orientation, int role) const
-{
-  if (role != Qt::DisplayRole)
-    return QVariant();
+QVariant SensorModel::headerData(int section, Qt::Orientation orientation, int role) const {
+  if (role != Qt::DisplayRole) return QVariant();
 
   if (orientation == Qt::Horizontal) {
     switch (section) {
-    case 0:
-      return tr("#");
-    case 1:
-      return tr("Название");
-    case 2:
-      return tr("Активный");
-    case 3:
-      return tr("Сетевой адрес");
-    case 4:
-      return tr("Порт");
-    case 5:
-      return tr("Конвертер");
-    case 6:
-      return tr("Имя канала");
-    case 7:
-      return tr("Описание");
-    case 8:
-      return tr("Единица измерения");
-    case 9:
-      return tr("Частота");
-    default:
-      break;
+    case 0: return tr("#");
+    case 1: return tr("Активный");
+    case 2: return tr("Название");
+    case 3: return tr("Сетевой адрес");
+    case 4: return tr("Порт");
+    case 5: return tr("Конвертер");
+    case 6: return tr("Имя канала");
+    case 7: return tr("Описание");
+    case 8: return tr("Единица измерения");
+    case 9: return tr("Частота");
+    case 10: return tr("Показание");
+    default: break;
     }
   }
   return QVariant();
 }
 
-bool SensorModel::visible(int col) const
-{
+bool SensorModel::visible(int col) const {
   switch (col) {
-  case 0:
-    return false;
-  case 1:
-    return true;
-  case 2:
-    return false;
-  case 3:
-    return true;
-  case 4:
-    return true;
-  case 5:
-    return false;
-  case 6:
-    return true;
-  case 7:
-    return false;
-  case 8:
-    return false;
-  case 9:
-    return true;
-  default:
-    break;
+  case 2: return true;
+  case 3: return true;
+   case 10: return true;
+  default: break;
   }
   return false;
 }
 
-QModelIndex SensorModel::ind(int row) const
-{
-  return index(row, 0, QModelIndex());
-}
-
-QModelIndex SensorModel::last() const
-{
-  return index(count() - 1, 0, QModelIndex());
-}
-
-QModelIndex SensorModel::first() const
-{
-  return index(0, 0, QModelIndex());
-}
-
-int SensorModel::count() const
-{
-  return sensors.size();
-}
-
-Sensor *SensorModel::get(int row)
-{
-  if (row >= sensors.size() || row < 0)
+Sensor *SensorModel::get(int row) {
+  if (row >= sensors->size() || row < 0)
     return nullptr;
-  Sensor &sensor = sensors[row]; //.at(row);
-  return &sensor;
+  Sensor *sensor = sensors->at(row);
+  return sensor;
 }
 
 void SensorModel::add(Sensor* sensor) {
   if (sensor->valid()) {
-    sensors.append(*sensor);
+    sensors->append(sensor);
     layoutChanged();
   }
 }
 
-void SensorModel::replace(int row, const Sensor &sensor) {
-  sensors.replace(row, sensor);
+void SensorModel::replace(int row,  Sensor &sensor) {
+  sensors->replace(row, &sensor);
 }
 
-int SensorModel::read()
-{
-  sensors.clear();
+int SensorModel::read() {
+  sensors->clear();
   QFile file(getDbName());
   if (file.exists()) {
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -190,9 +118,9 @@ int SensorModel::read()
       QJsonArray jsonArray = doc.array();
 
       for (const QJsonValue &value : std::as_const(jsonArray)) {
-        Sensor sensor;
-        sensor.fromJson(value.toObject());
-        add(&sensor);
+        Sensor *sensor = new Sensor();
+        sensor->fromJson(value.toObject());
+        add(sensor);
       }
     }
   }
@@ -200,13 +128,12 @@ int SensorModel::read()
   return EXIT_SUCCESS;
 }
 
-void SensorModel::write()
-{
+void SensorModel::write() {
   QFile file(getDbName());
   if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
     QJsonArray jsonArray;
-    for (auto &sensor : sensors) {
-      QJsonObject obj = sensor.toJson();
+    for (auto &sensor : *sensors) {
+      QJsonObject obj = sensor->toJson();
       jsonArray.append(obj);
     }
 
@@ -219,8 +146,7 @@ void SensorModel::write()
   }
 }
 
-QString SensorModel::getDbName()
-{
+QString SensorModel::getDbName() {
   auto result = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
   QDir().mkpath(result);
   return result + "/db.json";

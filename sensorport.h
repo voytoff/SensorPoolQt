@@ -1,6 +1,8 @@
 #ifndef SENSORPORT_H
 #define SENSORPORT_H
 
+#include "sensor.h"
+
 #include <QObject>
 #include <QTcpSocket>
 #include <QDateTime>
@@ -27,10 +29,11 @@ protected:
   QTcpSocket tcpSocket;
   Data data;
   QTimer timer;
+  Sensor *sensor;
   QVariantList connectingStates {QAbstractSocket::ConnectingState, QTcpSocket::ConnectedState};
 
 public slots:
-  bool connect(const QString host, const int port);
+  bool connect(Sensor *sensor);
   void start(int step);
   void close();
   bool isOpen();
