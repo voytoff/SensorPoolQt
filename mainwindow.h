@@ -9,7 +9,6 @@
 #include <QProgressBar>
 #include <QGroupBox>
 
-#include "ACDObject.h"
 #include "schemehelper.h"
 #include "sensormodel.h"
 #include "sensorport.h"
