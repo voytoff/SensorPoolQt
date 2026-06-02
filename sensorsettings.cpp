@@ -2,6 +2,11 @@
 #include "ui_sensorsettings.h"
 
 #include <QPushButton>
+#include <QtGui/qevent.h>
+#include <QFile>
+#include <QJsonParseError>
+#include <QJsonDocument>
+#include <QJsonArray>
 
 SensorSettings::SensorSettings(Sensor *sensor, QWidget *parent)
   : ClosableWidget(parent)
@@ -28,8 +33,10 @@ SensorSettings::SensorSettings(Sensor *sensor, QWidget *parent)
   ui->sensorPort->setValue(sensor->sensorPort);
   ui->channelName->setText(sensor->channelName);
   ui->description->setText(sensor->description);
-  ui->unit->setCurrentText(sensor->unit);
   ui->quantity->setCurrentText(QString::number(sensor->quantity));
+
+  readUnits();
+  ui->unit->setCurrentText(sensor->unit);
 
   connect(ui->buttonBox, &QDialogButtonBox::clicked, this, [this](QAbstractButton *button) { clicked(button); });
 }
@@ -51,5 +58,26 @@ void SensorSettings::clicked(QAbstractButton *button) {
     sensor->quantity = ui->quantity->currentText().toInt();
     sensor->isModified = true;
     emit sensorSaved(sensor);
+  }
+}
+
+void SensorSettings::readUnits() {
+  QFile file(":/units.json");
+  if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return;
+
+  QByteArray fileData = file.readAll();
+  file.close();
+
+  QJsonParseError parseError;
+  QJsonDocument jsonDoc = QJsonDocument::fromJson(fileData, &parseError);
+
+  if (parseError.error != QJsonParseError::NoError)
+    return;
+
+  if (jsonDoc.isArray()) {
+    QJsonArray jsonArray = jsonDoc.array();
+    for (const QJsonValue &value : std::as_const(jsonArray))
+      if (value.isString())
+        ui->unit->addItem(value.toString());
   }
 }

@@ -5,6 +5,7 @@
 #include "sensor.h"
 #include <QWidget>
 #include <QAbstractButton>
+#include <QStringList>
 
 namespace Ui {
 class SensorSettings;
@@ -20,9 +21,12 @@ public:
 
 protected:
   void clicked(QAbstractButton *button);
+  void extracted(QJsonArray &jsonArray);
+  void readUnits();
 
 private:
   Ui::SensorSettings *ui;
+  QStringList units;
 
 signals:
   void sensorSaved(Sensor *sensor);

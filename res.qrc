@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file>db.json</file>
+        <file>units.json</file>
         <file>images/tb/exit.svg</file>
         <file>images/tb/add.svg</file>
         <file>images/tb/del.svg</file>

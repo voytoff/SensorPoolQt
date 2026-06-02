@@ -143,8 +143,9 @@ void MainWindow::createControlBox() {
   adjustHeader();
 
   treeView->setRootIsDecorated(false);
-  treeView->setAlternatingRowColors(true);
-  treeView->setSortingEnabled(true);
+  //treeView->setAlternatingRowColors(true);
+  //treeView->setSortingEnabled(true);
+  treeView->header()->setSectionResizeMode(QHeaderView::Stretch);
   connect(treeView, &QTreeView::doubleClicked, this, &MainWindow::editSensor);
 
   QLocale locale = treeView->locale();
@@ -227,9 +228,7 @@ void MainWindow::adjustHeader() {
   for (int n = 0; n < model->columnCount(QModelIndex()); n++)
     if (!model->visible(n))
       treeView->hideColumn(n);
-  treeView->resizeColumnToContents(0);
-  treeView->resizeColumnToContents(1);
-  treeView->resizeColumnToContents(3);
+    else treeView->resizeColumnToContents(n);
 }
 
 void MainWindow::saveLayout() {
