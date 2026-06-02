@@ -21,16 +21,18 @@
 #include <QStyleHints>
 #include <QTableView>
 #include <QToolBar>
+#include <QDialog>
 
 #include "mainwindow.h"
 #include "sensorproperties.h"
+#include "sensorsettings.h"
 #include "settingsdlg.h"
 
 MainWindow::MainWindow(QWidget *parent)
   : QMainWindow{parent}
   , model(new SensorModel(this))
   , treeView(new QTreeView(this))
-  , tabControl(new QTabWidget(this))
+  , tabWidget(new QTabWidget(this))
   , splitter(new QSplitter(this))
   , sensorPort(new SensorPort(this))
   , schemeHelper(new SchemeHelper(this, ":/images/rocket.svg"))
@@ -40,7 +42,8 @@ MainWindow::MainWindow(QWidget *parent)
   QIcon::setThemeName("Material Symbols Outlined");
 
   connect(sensorPort, &SensorPort::readyData, this, [this](QByteArray data) {
-    qDebug() << QTime::currentTime().toString("hh:mm:ss.zzz") << sensorPort->get<QString>();
+    // qDebug() << QTime::currentTime().toString("hh:mm:ss.zzz") << sensorPort->get<QString>();
+    model->setData(model->index(1, 10, QModelIndex()), sensorPort->get<QString>());
   });
 
   model->read();
@@ -149,8 +152,15 @@ void MainWindow::createControlBox() {
   treeView->setLocale(locale);
   treeView->setItemDelegate(new CustomDelegate());
 
+  tabWidget->setTabsClosable(true);
+  connect(tabWidget, &QTabWidget::tabCloseRequested, this, [this](int index) {
+    QWidget* w = tabWidget->widget(index);
+    tabWidget->removeTab(index);
+    delete w;
+  });
+
   splitter->addWidget(treeView);
-  splitter->addWidget(tabControl);
+  splitter->addWidget(tabWidget);
 }
 
 void MainWindow::about() {
@@ -162,15 +172,17 @@ void MainWindow::about() {
 }
 
 void MainWindow::addSensor() {
-  Sensor *sensor = new Sensor();
-  SensorProperties *dialog = new SensorProperties(sensor, this);
-  int accepted = dialog->exec();
-
-  if (accepted == QDialog::Accepted && sensor->valid()) {
-    model->add(sensor);
-    treeView->setCurrentIndex(model->last());
-    treeView->scrollToBottom();
-  }
+  Sensor *sensor = new Sensor(true);
+  SensorSettings *settings = new SensorSettings(sensor, this);
+  addTab(settings, "Новый сенсор");
+  connect(settings, &SensorSettings::sensorSaved, this, [this](Sensor* sensor) {
+    if (sensor->isNew) {
+      sensor->isNew = false;
+      model->add(sensor);
+      treeView->setCurrentIndex(model->last());
+      treeView->scrollToBottom();
+    }
+  });
 }
 
 void MainWindow::delSensor() {
@@ -178,8 +190,10 @@ void MainWindow::delSensor() {
   if (index.isValid()) {
     Sensor *sensor = model->get(index.row());
     auto response = QMessageBox::question(this, AppName, QString("Удалить текущий сенсор '%1' из списка?").arg(sensor->name));
-    if (response == QMessageBox::Yes)
+    if (response == QMessageBox::Yes) {
       model->removeRow(index.row());
+      model->layoutChanged();
+    }
   }
 }
 
@@ -187,11 +201,8 @@ void MainWindow::editSensor() {
   QModelIndex index = treeView->currentIndex();
   if (index.isValid()) {
     Sensor *sensor = model->get(index.row());
-    SensorProperties *dialog = new SensorProperties(sensor, this);
-    int accepted = dialog->exec();
-    if (accepted == QDialog::Accepted && sensor->valid()) {
-      model->replace(index.row(), *sensor);
-    }
+    SensorSettings *settings = new SensorSettings(sensor, this);
+    addTab(settings, sensor->name);
   }
 }
 
@@ -204,7 +215,7 @@ void MainWindow::start() {
   if (index.isValid()) {
     Sensor *sensor = model->get(index.row());
     if (sensorPort->connect(sensor))
-      sensorPort->start(10);
+      sensorPort->start();
   }
 }
 
@@ -241,5 +252,11 @@ void MainWindow::doSettings() {
     if ((Qt::ColorScheme)colorScheme != QGuiApplication::styleHints()->colorScheme())
       schemeHelper->applayColorScheme(colorScheme);
   }
+}
+
+int MainWindow::addTab(QWidget *widget, const QString &name) {
+  int index = tabWidget->addTab(widget, name);
+  tabWidget->setCurrentIndex(index);
+  return index;
 }
 

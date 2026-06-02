@@ -1,22 +1,22 @@
 #include "sensorport.h"
+#include <QRegularExpression>
 
 SensorPort::SensorPort(QObject *parent) : QObject{parent},
   tcpSocket(this),
   timer(this) {
   timer.setTimerType(Qt::PreciseTimer);
   QAbstractSocket::connect(&timer, &QTimer::timeout, this, [this]() {
-    if (isOpen())
-      emit readyData(data);
+    sendData();
   });
   QAbstractSocket::connect(&tcpSocket, &QTcpSocket::connected, this, [this]() {
-    qDebug() << "Connected to server:)";
+    if (debug) qDebug() << "Connected to server:)";
   });
   QAbstractSocket::connect(&tcpSocket, &QTcpSocket::readyRead, this, [this]() {
     data = tcpSocket.readAll();
     if (debug) qDebug() << "Data received:" << data;
   });
   QAbstractSocket::connect(&tcpSocket, &QTcpSocket::disconnected, this, [this]() {
-    qDebug() << "Disconnected from server:(";
+    if (debug) qDebug() << "Disconnected from server:(";
     //deleteLater();
   });
 }
@@ -27,10 +27,10 @@ bool SensorPort::connect(Sensor *sensor) {
   return isOpen();
 }
 
-void SensorPort::start(int step) {
+void SensorPort::start() {
   qDebug() << tcpSocket.state();
   if (!isOpen()) return;
-  int msec = 1000 / step;
+  int msec = 1000 / sensor->quantity;
   if (!timer.isActive())
     timer.start(msec);
   else
@@ -43,6 +43,7 @@ void SensorPort::close() {
   //tcpSocket.disconnectFromHost();
   tcpSocket.abort();
   data.clear();
+  emit readyData(data);
 }
 
 bool SensorPort::isOpen() {
@@ -59,6 +60,18 @@ bool SensorPort::isOpen() {
 */
 }
 
-QString SensorPort::read_string() {
-  return QString::fromStdString(data.toStdString());
+QString SensorPort::toString() {
+  return trim(data.toStdString());
+}
+
+QString SensorPort::trim(const std::string &s) {
+  auto text = QString::fromStdString(s);
+  text.remove(QRegularExpression("^\\s+"));
+  text.remove(QRegularExpression("[\\r\\n\\0]+$"));
+  return text;
+}
+
+void SensorPort::sendData() {
+  if (isOpen())
+    emit readyData(data);
 }

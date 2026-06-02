@@ -1,14 +1,11 @@
-#include <QBindable>
-#include <QCloseEvent>
-#include <QRegularExpression>
-#include <QRegularExpressionValidator>
+#include "sensorsettings.h"
+#include "ui_sensorsettings.h"
 
-#include "sensorproperties.h"
-#include "ui_sensorproperties.h"
+#include <QPushButton>
 
-SensorProperties::SensorProperties(Sensor *sensor, QWidget *parent)
-  : QDialog(parent)
-  , ui(new Ui::SensorProperties)
+SensorSettings::SensorSettings(Sensor *sensor, QWidget *parent)
+  : ClosableWidget(parent)
+  , ui(new Ui::SensorSettings)
   , sensor(sensor)
 {
   ui->setupUi(this);
@@ -24,32 +21,25 @@ SensorProperties::SensorProperties(Sensor *sensor, QWidget *parent)
   ui->quantity->addItem("10", 10);
   ui->quantity->addItem("100", 100);
 
+  ui->oid->setText(sensor->oid.toString());
   ui->name->setText(sensor->name);
   ui->active->setChecked(sensor->active);
   ui->sensorHost->setText(sensor->sensorHost);
   ui->sensorPort->setValue(sensor->sensorPort);
-  //ui->sensorConverter->setCurrentText(sensor.SensorConverter);
   ui->channelName->setText(sensor->channelName);
   ui->description->setText(sensor->description);
   ui->unit->setCurrentText(sensor->unit);
   ui->quantity->setCurrentText(QString::number(sensor->quantity));
 
-  connect(this, &QDialog::finished, this, [this](int result) { accept(result); });
-
-  setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+  connect(ui->buttonBox, &QDialogButtonBox::clicked, this, [this](QAbstractButton *button) { clicked(button); });
 }
 
-SensorProperties::~SensorProperties()
-{
+SensorSettings::~SensorSettings() {
   delete ui;
 }
 
-void SensorProperties::closeEvent(QCloseEvent *event) {}
-
-void SensorProperties::accept(const int result)
-{
-  qDebug() << "Dialog closed with result:" << result;
-  if (result == QDialog::Accepted) {
+void SensorSettings::clicked(QAbstractButton *button) {
+  if (button == ui->buttonBox->button(QDialogButtonBox::Save)) {
     sensor->name = ui->name->text();
     sensor->active = ui->active->isChecked();
     sensor->sensorHost = ui->sensorHost->text();
@@ -59,5 +49,7 @@ void SensorProperties::accept(const int result)
     sensor->description = ui->description->text();
     sensor->unit = ui->unit->currentText();
     sensor->quantity = ui->quantity->currentText().toInt();
+    sensor->isModified = true;
+    emit sensorSaved(sensor);
   }
 }

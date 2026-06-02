@@ -64,7 +64,7 @@ private:
 
   QSplitter *splitter;
   QTreeView *treeView;
-  QTabWidget *tabControl;
+  QTabWidget *tabWidget;
   SensorModel *model;
 
   SchemeHelper *schemeHelper;
@@ -75,9 +75,10 @@ private:
   void saveLayout();
 
   void doSettings();
-
+  int addTab(QWidget *widget, const QString &name);
 
 signals:
+
 };
 
 #endif // MAINWINDOW_H

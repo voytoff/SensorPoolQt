@@ -19,22 +19,26 @@ public:
   template <typename T> inline T get() {
     T result;
     if constexpr (std::is_same_v<T, QString>)
-      result = read_string();
+      result = toString();
     else result = T();
     return result;
   }
 
 protected:
-  virtual QString read_string();
+  virtual QString toString();
+  virtual QString trim(const std::string &s);
   QTcpSocket tcpSocket;
   Data data;
   QTimer timer;
   Sensor *sensor;
   QVariantList connectingStates {QAbstractSocket::ConnectingState, QTcpSocket::ConnectedState};
 
+private:
+  void sendData();
+
 public slots:
   bool connect(Sensor *sensor);
-  void start(int step);
+  void start();
   void close();
   bool isOpen();
 

@@ -25,33 +25,24 @@ public:
   int columnCount(const QModelIndex &parent) const override;
   QVariant data(const QModelIndex &index, int role) const override;
   QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+  bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+  bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
   bool visible(int col) const;
   inline QModelIndex last() const {
-    return index(0, 0, QModelIndex());
+    return index(count() - 1, 0, QModelIndex());
   }
   inline int count() const {
     return sensors->size();
   }
   void add(Sensor *sensor);
   Sensor *get(int row);
-  void replace(int row, Sensor &sensor);
+  void replace(Sensor &sensor);
   int read();
   void write();
 
 private:
-  Sensor *addEntry(
-    QUuid oid,
-    QString name,
-    bool active,
-    QString sensorHost,
-    int sensorPort,
-    QString sensorConverter,
-    QString channelName,
-    QString description,
-    QString unit,
-    int quantity);
-
   QList<Sensor*> *sensors;
+  int indexOf(QList<Sensor*> list, std::function<bool (const Sensor *)> &predicate);
 };
 
 class CustomDelegate : public QStyledItemDelegate {

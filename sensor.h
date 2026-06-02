@@ -3,12 +3,13 @@
 
 #include <QUuid>
 #include <QJsonObject>
+#include <QProperty>
+
 class Sensor : public QObject {
   Q_OBJECT
 public:
-  explicit Sensor(QObject *parent = nullptr);
+  explicit Sensor(bool isNew = false, QObject *parent = nullptr);
   bool operator==(const Sensor &other) const { return name == other.name && oid == other.oid; }
-  const QVariant at(const int index);
 
   QUuid oid;
   QString name;
@@ -19,13 +20,16 @@ public:
   QString description;
   QString unit;
   int quantity;
-  double value;
+  QVariant value;
+  bool isNew = false;
 
   virtual double convert(QByteArray data);
 
+  const QVariant at(const int index);
   bool valid();
   void fromJson(const QJsonObject &obj);
   QJsonObject toJson();
+  bool isModified = false;
 };
 
 inline QDataStream &operator<<(QDataStream &stream, const Sensor &sensor) {
