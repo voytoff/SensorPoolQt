@@ -28,12 +28,11 @@ public:
   bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
   bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
   bool visible(int col) const;
-  inline QModelIndex last() const {
-    return index(count() - 1, 0, QModelIndex());
-  }
-  inline int count() const {
-    return sensors->size();
-  }
+  inline QModelIndex last() const { return index(count() - 1, 0, QModelIndex()); }
+  inline int count() const { return sensors->size(); }
+  int indexOf(const Sensor &sensor);
+  int indexOf(std::function<bool (const Sensor*)> &predicate);
+
   void add(Sensor *sensor);
   Sensor *get(int row);
   void replace(Sensor &sensor);
@@ -42,7 +41,6 @@ public:
 
 private:
   QList<Sensor*> *sensors;
-  int indexOf(QList<Sensor*> list, std::function<bool (const Sensor *)> &predicate);
 };
 
 class CustomDelegate : public QStyledItemDelegate {

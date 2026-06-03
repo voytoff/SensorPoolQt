@@ -8,7 +8,7 @@ SensorPort::SensorPort(QObject *parent) : QObject{parent},
   timer(this) {
   timer.setTimerType(Qt::PreciseTimer);
   QAbstractSocket::connect(&timer, &QTimer::timeout, this, [this]() {
-    sendData();
+    populateData();
   });
   QAbstractSocket::connect(&tcpSocket, &QTcpSocket::connected, this, [this]() {
     if (debug) qDebug() << "Connected to server:)";
@@ -39,8 +39,7 @@ void SensorPort::start() {
 }
 
 void SensorPort::close() {
-  if (timer.isActive())
-    timer.stop();
+  if (timer.isActive()) timer.stop();
   //tcpSocket.disconnectFromHost();
   tcpSocket.abort();
   data.clear();
@@ -71,7 +70,7 @@ double SensorPort::toDouble() {
   return sensor->convert(data).toDouble();
 }
 
-void SensorPort::sendData() {
+void SensorPort::populateData() {
   if (isOpen()) {
     sensor->value = sensor->convert(data);
     emit dataChanged(sensor, data);

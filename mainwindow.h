@@ -77,6 +77,7 @@ private:
 
   void doSettings();
   int addTab(QWidget *widget, const QString &name);
+  int delTab(const int &index);
 
 signals:
 

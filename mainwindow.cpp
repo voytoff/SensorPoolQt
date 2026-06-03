@@ -41,9 +41,9 @@ MainWindow::MainWindow(QWidget *parent)
   QIcon::setThemeName("Material Symbols Outlined");
 
   connect(sensorPort, &SensorPort::dataChanged, this, [this](Sensor *sensor, QByteArray data) {
-    // qDebug() << QTime::currentTime().toString("hh:mm:ss.zzz") << sensorPort->get<QString>();
     //model->setData(model->index(1, 10, QModelIndex()), sensorPort->get<QString>());
-    model->layoutChanged();
+    int row = model->indexOf(*sensor);
+    model->dataChanged(model->index(row, 0, QModelIndex()), model->index(row, model->columnCount(QModelIndex()) - 1, QModelIndex()));
   });
 
   model->read();
@@ -175,14 +175,17 @@ void MainWindow::about() {
 void MainWindow::addSensor() {
   Sensor *sensor = new Sensor(true);
   SensorSettings *settings = new SensorSettings(sensor, this);
-  addTab(settings, "Новый сенсор");
-  connect(settings, &SensorSettings::sensorSaved, this, [this](Sensor* sensor) {
+  auto index = addTab(settings, "Новый сенсор");
+  connect(settings, &SensorSettings::sensorSaved, this, [this, index](Sensor* sensor) {
     if (sensor->isNew) {
       sensor->isNew = false;
       model->add(sensor);
       treeView->setCurrentIndex(model->last());
       treeView->scrollToBottom();
     }
+    QWidget* w = tabWidget->widget(index);
+    tabWidget->removeTab(index);
+    delete w;
   });
 }
 
@@ -260,5 +263,11 @@ int MainWindow::addTab(QWidget *widget, const QString &name) {
   int index = tabWidget->addTab(widget, name);
   tabWidget->setCurrentIndex(index);
   return index;
+}
+
+int MainWindow::delTab(const int &index) {
+  QWidget* w = tabWidget->widget(index);
+  tabWidget->removeTab(index);
+  delete w;
 }
 

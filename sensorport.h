@@ -34,7 +34,7 @@ protected:
   QVariantList connectedStates {QAbstractSocket::ConnectedState, QTcpSocket::ConnectedState};
 
 private:
-  void sendData();
+  void populateData();
 
 public slots:
   void connect(Sensor *sensor);
