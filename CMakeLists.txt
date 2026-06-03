@@ -27,9 +27,7 @@ qt_add_executable(SensorPull
     ${PROJECT_RESOURCES}
     sensorproperties.h sensorproperties.cpp sensorproperties.ui
     sensormodel.h sensormodel.cpp
-
     sensorport.h sensorport.cpp
-    isensorconverter.h
     sensor.h sensor.cpp
     settings.cpp settings.h
     settingsdlg.h settingsdlg.cpp settingsdlg.ui
@@ -66,6 +64,7 @@ target_link_libraries(SensorPull PRIVATE
     Qt6::Quick
     Qt6::Gui
     Qt6::WebSockets
+    GlobalLib
     MMPFile
     SchemeHelper
 )

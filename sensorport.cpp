@@ -1,5 +1,7 @@
 #include "sensorport.h"
+#include "lib.h"
 #include <QRegularExpression>
+#include <QThread>
 
 SensorPort::SensorPort(QObject *parent) : QObject{parent},
   tcpSocket(this),
@@ -21,10 +23,9 @@ SensorPort::SensorPort(QObject *parent) : QObject{parent},
   });
 }
 
-bool SensorPort::connect(Sensor *sensor) {
+void SensorPort::connect(Sensor *sensor) {
   this->sensor = sensor;
   tcpSocket.connectToHost(sensor->sensorHost, sensor->sensorPort);
-  return isOpen();
 }
 
 void SensorPort::start() {
@@ -43,11 +44,12 @@ void SensorPort::close() {
   //tcpSocket.disconnectFromHost();
   tcpSocket.abort();
   data.clear();
-  emit readyData(data);
+  sensor->value = QVariant();
+  emit dataChanged(sensor, data);
 }
 
 bool SensorPort::isOpen() {
-  return connectingStates.contains(tcpSocket.state());
+  return connectedStates.contains(tcpSocket.state());
 /*
   switch (state) {
     case QAbstractSocket::UnconnectedState: // Disconnected  break;
@@ -61,17 +63,17 @@ bool SensorPort::isOpen() {
 }
 
 QString SensorPort::toString() {
-  return trim(data.toStdString());
+  auto text = QString::fromStdString(data.toStdString());
+  return lib::trim(text);
 }
 
-QString SensorPort::trim(const std::string &s) {
-  auto text = QString::fromStdString(s);
-  text.remove(QRegularExpression("^\\s+"));
-  text.remove(QRegularExpression("[\\r\\n\\0]+$"));
-  return text;
+double SensorPort::toDouble() {
+  return sensor->convert(data).toDouble();
 }
 
 void SensorPort::sendData() {
-  if (isOpen())
-    emit readyData(data);
+  if (isOpen()) {
+    sensor->value = sensor->convert(data);
+    emit dataChanged(sensor, data);
+  }
 }

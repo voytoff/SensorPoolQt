@@ -1,6 +1,7 @@
 #ifndef SENSOR_H
 #define SENSOR_H
 
+#include "isensorconverter.h"
 #include <QUuid>
 #include <QJsonObject>
 #include <QProperty>
@@ -16,19 +17,24 @@ public:
   bool active;
   QString sensorHost;
   int sensorPort;
+  QUuid converterID;
   QString channelName;
   QString description;
   QString unit;
   int quantity;
   QVariant value;
-  bool isNew = false;
 
-  virtual double convert(QByteArray data);
+  std::unique_ptr<ISensorConverter> _converter;
+  ISensorConverter *converter();
+
+  virtual QVariant convert(const QByteArray &data);
 
   const QVariant at(const int index);
   bool valid();
   void fromJson(const QJsonObject &obj);
   QJsonObject toJson();
+
+  bool isNew = false;
   bool isModified = false;
 };
 

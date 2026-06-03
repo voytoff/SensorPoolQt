@@ -12,7 +12,7 @@
 class SensorPort : public QObject {
   Q_OBJECT
 private:
-  typedef QByteArray Data;
+  //typedef QByteArray Data;
 public:
   explicit SensorPort(QObject *parent = nullptr);
   bool debug = false;
@@ -26,24 +26,24 @@ public:
 
 protected:
   virtual QString toString();
-  virtual QString trim(const std::string &s);
+  virtual double toDouble();
   QTcpSocket tcpSocket;
-  Data data;
+  QByteArray data;
   QTimer timer;
   Sensor *sensor;
-  QVariantList connectingStates {QAbstractSocket::ConnectingState, QTcpSocket::ConnectedState};
+  QVariantList connectedStates {QAbstractSocket::ConnectedState, QTcpSocket::ConnectedState};
 
 private:
   void sendData();
 
 public slots:
-  bool connect(Sensor *sensor);
+  void connect(Sensor *sensor);
   void start();
   void close();
   bool isOpen();
 
 signals:
-  void readyData(QByteArray &data);
+  void dataChanged(Sensor *sensor, QByteArray &data);
 };
 
 #endif // SENSORPORT_H

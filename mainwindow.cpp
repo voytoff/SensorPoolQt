@@ -24,7 +24,6 @@
 #include <QDialog>
 
 #include "mainwindow.h"
-#include "sensorproperties.h"
 #include "sensorsettings.h"
 #include "settingsdlg.h"
 
@@ -41,9 +40,10 @@ MainWindow::MainWindow(QWidget *parent)
 
   QIcon::setThemeName("Material Symbols Outlined");
 
-  connect(sensorPort, &SensorPort::readyData, this, [this](QByteArray data) {
+  connect(sensorPort, &SensorPort::dataChanged, this, [this](Sensor *sensor, QByteArray data) {
     // qDebug() << QTime::currentTime().toString("hh:mm:ss.zzz") << sensorPort->get<QString>();
-    model->setData(model->index(1, 10, QModelIndex()), sensorPort->get<QString>());
+    //model->setData(model->index(1, 10, QModelIndex()), sensorPort->get<QString>());
+    model->layoutChanged();
   });
 
   model->read();
@@ -215,8 +215,11 @@ void MainWindow::start() {
   QModelIndex index = treeView->currentIndex();
   if (index.isValid()) {
     Sensor *sensor = model->get(index.row());
-    if (sensorPort->connect(sensor))
-      sensorPort->start();
+    sensorPort->connect(sensor);
+    QTimer::singleShot(250, this, [this]() {
+      if (sensorPort->isOpen())
+        sensorPort->start();
+    });
   }
 }
 

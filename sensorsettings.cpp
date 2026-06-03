@@ -1,9 +1,11 @@
 #include "sensorsettings.h"
 #include "ui_sensorsettings.h"
+#include "interfacefactory.h"
 
 #include <QPushButton>
 #include <QtGui/qevent.h>
 #include <QFile>
+#include <QPluginLoader>
 #include <QJsonParseError>
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -38,6 +40,16 @@ SensorSettings::SensorSettings(Sensor *sensor, QWidget *parent)
   readUnits();
   ui->unit->setCurrentText(sensor->unit);
 
+  auto list = InterfaceFactory::instance().availableClasses();
+  if (list.length() > 0) {
+    ui->sensorConverter->addItem(nullptr);
+    foreach (auto converter, list) {
+      ui->sensorConverter->addItem(converter.caption, converter.uid);
+      if (converter.uid == sensor->converterID)
+        ui->sensorConverter->setCurrentText(converter.caption);
+    }
+  }
+
   connect(ui->buttonBox, &QDialogButtonBox::clicked, this, [this](QAbstractButton *button) { clicked(button); });
 }
 
@@ -51,7 +63,7 @@ void SensorSettings::clicked(QAbstractButton *button) {
     sensor->active = ui->active->isChecked();
     sensor->sensorHost = ui->sensorHost->text();
     sensor->sensorPort = ui->sensorPort->value();
-    //sensor.SensorConverter = ui->sensorConverter->currentText();
+    sensor->converterID = ui->sensorConverter->currentData().toUuid();
     sensor->channelName = ui->channelName->text();
     sensor->description = ui->description->text();
     sensor->unit = ui->unit->currentText();
@@ -75,6 +87,7 @@ void SensorSettings::readUnits() {
     return;
 
   if (jsonDoc.isArray()) {
+    ui->unit->addItem(nullptr);
     QJsonArray jsonArray = jsonDoc.array();
     for (const QJsonValue &value : std::as_const(jsonArray))
       if (value.isString())

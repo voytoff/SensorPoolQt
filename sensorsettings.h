@@ -2,6 +2,7 @@
 #define SENSORSETTINGS_H
 
 #include "closablewidget.h"
+#include "interfacefactory.h"
 #include "sensor.h"
 #include <QWidget>
 #include <QAbstractButton>
@@ -17,6 +18,7 @@ class SensorSettings : public ClosableWidget {
 public:
   explicit SensorSettings(Sensor *sensor, QWidget *parent = nullptr);
   ~SensorSettings();
+  InterfaceFactory *factory;
   Sensor *sensor;
 
 protected:

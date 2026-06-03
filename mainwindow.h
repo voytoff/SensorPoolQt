@@ -10,6 +10,7 @@
 #include <QGroupBox>
 #include <QSplitter>
 
+#include "interfacefactory.h"
 #include "schemehelper.h"
 #include "sensormodel.h"
 #include "sensorport.h"

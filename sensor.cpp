@@ -1,9 +1,16 @@
 #include "sensor.h"
+#include "interfacefactory.h"
 
 Sensor::Sensor(bool isNew, QObject *parent)
   : QObject{parent}
   , oid(QUuid::createUuid())
   , isNew(isNew) {}
+
+ISensorConverter *Sensor::converter() {
+  if (!_converter && InterfaceFactory::instance().contains(converterID))
+    _converter = InterfaceFactory::instance().create(converterID);
+  return _converter.get();
+}
 
 const QVariant Sensor::at(const int index) {
   QVariant result;
@@ -14,7 +21,7 @@ const QVariant Sensor::at(const int index) {
   case 2: result.setValue(active); break;
   case 3: result.setValue(sensorHost); break;
   case 4: result.setValue(sensorPort); break;
-  //case 5: result.setValue(SensorConverter); break;
+  case 5: result.setValue(converterID); break;
   case 6: result.setValue(channelName); break;
   case 7: result.setValue(description); break;
   case 8: result.setValue(unit); break;
@@ -25,13 +32,13 @@ const QVariant Sensor::at(const int index) {
   return result;
 }
 
-double Sensor::convert(QByteArray data) {
-  return 0;
+QVariant Sensor::convert(const QByteArray &data) {
+  return converter() ? converter()->convert(data).toDouble() : QVariant();
 }
 
 bool Sensor::valid() {
   if (oid.isNull())
-    oid = QUuid();
+    oid = QUuid::createUuid();
   return true;
 }
 
@@ -41,7 +48,7 @@ void Sensor::fromJson(const QJsonObject &obj) {
   active = obj.value("Active").toBool();
   sensorHost = obj.value("SensorHost").toString();
   sensorPort = obj.value("SensorPort").toInt();
-  //sensor.SensorConverter = obj.value("SensorConverter").toString();
+  converterID = QUuid(obj.value("SensorConverter").toString());
   channelName = obj.value("ChannelName").toString();
   description = obj.value("Description").toString();
   unit = obj.value("Unit").toString();
@@ -55,7 +62,7 @@ QJsonObject Sensor::toJson() {
   obj["Active"] = active;
   obj["SensorHost"] = sensorHost;
   obj["SensorPort"] = sensorPort;
-  //  obj["SensorConverter"] = SensorConverter;
+  obj["SensorConverter"] = converterID.toString();
   obj["ChannelName"] = channelName;
   obj["Description"] = description;
   obj["Unit"] = unit;
