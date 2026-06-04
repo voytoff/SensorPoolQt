@@ -14,6 +14,7 @@
 #include "schemehelper.h"
 #include "sensormodel.h"
 #include "sensorport.h"
+#include "sensorsettings.h"
 #include "settings.h"
 /*
 QT_FORWARD_DECLARE_CLASS(QComboBox)
@@ -77,7 +78,8 @@ private:
 
   void doSettings();
   int addTab(QWidget *widget, const QString &name);
-  int delTab(const int &index);
+  void delTab(const int &index);
+  void hookTab(SensorSettings *settings, const int &index);
 
 signals:
 

@@ -176,17 +176,7 @@ void MainWindow::addSensor() {
   Sensor *sensor = new Sensor(true);
   SensorSettings *settings = new SensorSettings(sensor, this);
   auto index = addTab(settings, "Новый сенсор");
-  connect(settings, &SensorSettings::sensorSaved, this, [this, index](Sensor* sensor) {
-    if (sensor->isNew) {
-      sensor->isNew = false;
-      model->add(sensor);
-      treeView->setCurrentIndex(model->last());
-      treeView->scrollToBottom();
-    }
-    QWidget* w = tabWidget->widget(index);
-    tabWidget->removeTab(index);
-    delete w;
-  });
+  hookTab(settings, index);
 }
 
 void MainWindow::delSensor() {
@@ -206,7 +196,8 @@ void MainWindow::editSensor() {
   if (index.isValid()) {
     Sensor *sensor = model->get(index.row());
     SensorSettings *settings = new SensorSettings(sensor, this);
-    addTab(settings, sensor->name);
+    int index = addTab(settings, sensor->name);
+    hookTab(settings, index);
   }
 }
 
@@ -265,9 +256,23 @@ int MainWindow::addTab(QWidget *widget, const QString &name) {
   return index;
 }
 
-int MainWindow::delTab(const int &index) {
+void MainWindow::delTab(const int &index) {
   QWidget* w = tabWidget->widget(index);
   tabWidget->removeTab(index);
   delete w;
+}
+
+void MainWindow::hookTab(SensorSettings *settings, const int &index) {
+  connect(settings, &SensorSettings::sensorSaved, this, [this, index](Sensor* sensor) {
+    if (sensor->isNew) {
+      sensor->isNew = false;
+      model->add(sensor);
+      treeView->setCurrentIndex(model->last());
+      treeView->scrollToBottom();
+    }
+    QWidget* w = tabWidget->widget(index);
+    tabWidget->removeTab(index);
+    delete w;
+  });
 }
 
